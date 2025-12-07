@@ -237,7 +237,7 @@
       * @param {number[] | string[]} sealOrder 
       * @param {boolean} openSeals 
       */
-    runSeals: function (sealOrder, openSeals = true, recheck = false) {
+    runSeals: function (sealOrder, openSeals = true) {
       console.log("seal order: " + sealOrder);
       _Diablo.sealOrder = sealOrder;
       const seals = {
@@ -249,6 +249,7 @@
         "infector": () => this.infectorSeal(openSeals),
       };
       sealOrder.forEach(function (seal) {
+        if (_Diablo.diabloSpawned) return;
         seals[seal]();
       });
     },
@@ -308,6 +309,7 @@
         }
 
         if (seal.mode) {
+          console.debug("Seal " + classid + " is already open.");
           warn && say(Config.Diablo.SealWarning);
           return true;
         }
@@ -544,7 +546,7 @@
 
       try {
         if (Config.Diablo.Fast) {
-          if (tryOpenSeals()) {
+          if (!tryOpenSeals()) {
             throw new Error("Failed to open Infector seals.");
           }
           moveToLoc();
