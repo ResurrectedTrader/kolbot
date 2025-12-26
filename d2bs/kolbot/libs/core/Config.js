@@ -310,7 +310,8 @@ let Config = {
   Recipes: [],
   MakeRunewords: false,
   /**
-   * @type {[runeword, string | number, ?boolean][]}
+   * @type {[runeword, string | number, ?boolean, number | undefined][]}
+   * @example [Runeword.Enigma, 'Archon Plate', Roll.NonEth, 100]
    */
   Runewords: [],
   KeepRunewords: [],
@@ -632,6 +633,7 @@ let Config = {
     MaxGameLength: 0,
   },
   ControlBot: {
+    WelcomePlayers: true,
     Bo: false,
     DropGold: false,
     Cows: {

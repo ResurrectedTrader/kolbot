@@ -157,7 +157,11 @@ declare global {
     RepairPercent: number;
     Recipes: CubingRecipe[];
     MakeRunewords: boolean;
-    Runewords: any[][];
+    /**
+     * runeword, item name or id, ethereal (Roll.Eth, Roll.NonEth, Roll.Any or undefined), priority (number or undefined)
+     * @example [Runeword.Enigma, 'Archon Plate', Roll.NonEth, 100]
+     */
+    Runewords: [runeword, string | number, boolean | undefined, number | undefined][];
     KeepRunewords: any[];
     LadderOverride: boolean;
     Gamble: boolean;
