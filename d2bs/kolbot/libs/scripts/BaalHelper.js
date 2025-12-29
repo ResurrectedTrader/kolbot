@@ -41,7 +41,7 @@ const BaalHelper = new Runnable(
 
         return false;
       }, Time.minutes(Config.BaalHelper.Wait), 1000)) {
-        throw new Error(
+        throw new ScriptError(
           "Player wait timed out (" + (Config.Leader ? "Leader not" : "No players") + " found in Throne)"
         );
       }
@@ -92,7 +92,7 @@ const BaalHelper = new Runnable(
 
         return false;
       }, Time.minutes(Config.BaalHelper.Wait), 1000)) {
-        throw new Error("Player wait timed out (" + (Config.Leader ? "No leader" : "No player") + " portals found)");
+        throw new ScriptError("Player wait timed out (" + (Config.Leader ? "No leader" : "No player") + " portals found)");
       }
     }
 

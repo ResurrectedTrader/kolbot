@@ -736,6 +736,9 @@ const Town = {
     try {
       scroll.buy(true);
     } catch (e2) {
+      if ((e2 instanceof ScriptError)) {
+        throw e2;
+      }
       console.log(e2.message);
 
       return false;
@@ -2137,7 +2140,7 @@ const Town = {
     if (act !== me.act) {
       try {
         Pather.useWaypoint(sdk.areas.townOfAct(act), wpmenu);
-      } catch (WPError) {
+      } catch (e) {
         if ((e instanceof ScriptError)) {
           throw e;
         }
