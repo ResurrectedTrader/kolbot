@@ -110,8 +110,8 @@ const BaalHelper = new Runnable(
       throw new Error("Couldn't clear baal waves");
     }
 
-    if (Config.BaalHelper.KillBaal) {
-      Common.Baal.killBaal();
+    if (Config.BaalHelper.KillBaal || Config.BaalHelper.HurtBaal) {
+      Common.Baal.killBaal(Config.BaalHelper.HurtBaal);
     } else {
       Town.goToTown();
       // infinite loops are bad, TODO: add break condition, maybe a 5-10 minute timeout?

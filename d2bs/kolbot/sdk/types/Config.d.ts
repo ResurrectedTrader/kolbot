@@ -350,6 +350,7 @@ declare global {
       SafeTPMessage: any[];
       BaalMessage: any[];
       NextGameMessage: any[];
+      HurtBaal: number;
     };
     BaalHelper: {
       Wait: number;
@@ -359,6 +360,7 @@ declare global {
       SoulQuit: boolean;
       KillBaal: boolean;
       SkipTP: boolean;
+      HurtBaal: number;
     };
     Corpsefire: {
       ClearDen: boolean;
@@ -390,6 +392,7 @@ declare global {
       ClearRadius: number;
       SealOrder: DiabloSeal[];
       RecheckSeals: boolean;
+      HurtDiablo: number;
     };
     AutoChaos: {
       Leader: string;
