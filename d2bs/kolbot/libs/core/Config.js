@@ -568,6 +568,7 @@ let Config = {
     StarTP: "Star TP up",
     DiabloMsg: "Diablo",
     ClearRadius: 30,
+    ClearType: sdk.monsters.spectype.All,
     /** @type {import("sdk/types/Config").DiabloSeal[]} */
     SealOrder: ["vizier", "seis", "infector"]
   },
@@ -579,6 +580,7 @@ let Config = {
     OpenSeals: false,
     SafePrecast: true,
     ClearRadius: 30,
+    ClearType: sdk.monsters.spectype.All,
     /** @type {import("sdk/types/Config").DiabloSeal[]} */
     SealOrder: ["vizier", "seis", "infector"],
     RecheckSeals: false,
