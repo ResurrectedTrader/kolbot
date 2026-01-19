@@ -273,6 +273,10 @@ let Config = {
   SkipImmune: [],
   SkipAura: [],
   SkipException: [],
+  /**
+   * @type {({ classid?: number, name?: string, spectype?: number, enchant?: number[], aura?: number[], immunity?: DamageType[] }|((unit: Monster) => boolean))[]}
+   */
+  AdvancedSkipCheck: [],
   /** @type {DamageType[]} */
   ImmunityException: [],
   /** @type {number[]} */
