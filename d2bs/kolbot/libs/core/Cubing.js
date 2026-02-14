@@ -591,7 +591,7 @@ const Cubing = {
       case Recipe.Token:
       case Recipe.Gem:
         if (index === Recipe.Token) {
-          recipeObj.KeyItem = sdk.items.TokenofAbsolution;
+          recipeObj.KeyItem = sdk.items.quest.TokenofAbsolution;
         }
         recipeObj.AlwaysEnabled = true;
 
