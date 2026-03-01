@@ -174,6 +174,7 @@ const Town = {
       Town.heal();
       Town.identify();
       Town.clearInventory();
+      Pickit.pickItems();
       Town.fillTome(sdk.items.TomeofTownPortal);
       Town.buyPotions();
       Config.FieldID.Enabled && Town.fillTome(sdk.items.TomeofIdentify);
@@ -187,6 +188,10 @@ const Town = {
       Town.stash(true);
       Town.checkQuestItems();
       !!me.getItem(sdk.items.TomeofTownPortal) && Town.clearScrolls();
+
+      if (Config.SortSettings.SortInventory) {
+        Storage.Inventory.SortItems();
+      }
 
       me.act !== preAct && Town.goToTown(preAct);
       me.cancelUIFlags();
@@ -2298,7 +2303,11 @@ const Town = {
     }
 
     // stash the bad gems first
-    !isInventoryClean && Town.stash();
+    if (!isInventoryClean) {
+      Town.identify();
+      Town.clearInventory();
+      Town.stash();
+    }
 
     // get any good gem. flawless first (by lvlreq)
     const goodGem = me.getItemsEx()
