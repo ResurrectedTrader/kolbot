@@ -252,36 +252,12 @@ NTIP.CheckItem = function (item, entryList, verbose) {
       const [type, stat, wanted] = list[i];
 
       if (typeof type === "function") {
-        if (type(item)) {
-          if (typeof stat === "function") {
-            if (stat(item)) {
-              if (wanted && wanted.MaxQuantity && !isNaN(wanted.MaxQuantity)) {
-                num = NTIP.CheckQuantityOwned(type, stat);
-
-                if (num < wanted.MaxQuantity) {
-                  result = 1;
-
-                  break;
-                } else {
-                  // attempt at inv fix for maxquantity
-                  if (item.getParent() && item.getParent().name === me.name && item.isInStorage && num === wanted.MaxQuantity) {
-                    result = 1;
-
-                    break;
-                  }
-                }
-              } else {
-                result = 1;
-
-                break;
-              }
-            } else if (!identified && result === 0) {
-              result = -1;
-              verbose && (rval.line = stringArray[i].file + " #" + stringArray[i].line);
-            }
-          } else {
+        if (!type(item)) continue;
+        
+        if (typeof stat === "function") {
+          if (stat(item)) {
             if (wanted && wanted.MaxQuantity && !isNaN(wanted.MaxQuantity)) {
-              num = NTIP.CheckQuantityOwned(type, null);
+              num = NTIP.CheckQuantityOwned(type, stat);
 
               if (num < wanted.MaxQuantity) {
                 result = 1;
@@ -300,6 +276,30 @@ NTIP.CheckItem = function (item, entryList, verbose) {
 
               break;
             }
+          } else if (!identified && result === 0) {
+            result = -1;
+            verbose && (rval.line = stringArray[i].file + " #" + stringArray[i].line);
+          }
+        } else {
+          if (wanted && wanted.MaxQuantity && !isNaN(wanted.MaxQuantity)) {
+            num = NTIP.CheckQuantityOwned(type, null);
+
+            if (num < wanted.MaxQuantity) {
+              result = 1;
+
+              break;
+            } else {
+              // attempt at inv fix for maxquantity
+              if (item.getParent() && item.getParent().name === me.name && item.isInStorage && num === wanted.MaxQuantity) {
+                result = 1;
+
+                break;
+              }
+            }
+          } else {
+            result = 1;
+
+            break;
           }
         }
       } else if (typeof stat === "function") {
@@ -367,6 +367,136 @@ NTIP.CheckItem = function (item, entryList, verbose) {
   }
 
   return result;
+};
+
+/**
+ * @param {ItemUnit} item 
+ * @param {[(item) => Boolean, (item) => Boolean, (item) => Boolean]} entryList 
+ * @returns {{line: string, result: number}[]}
+ */
+NTIP.DebugCheckItem = function (item, entryList, verbose) {
+  let i, num;
+  /** @type {{ line: string, result: number }[]} */
+  let results = [];
+  let result = 0;
+
+  const list = entryList
+    ? entryList
+    : NTIP_CheckList;
+  const identified = item.getFlag(sdk.items.flags.Identified);
+
+  for (i = 0; i < list.length; i++) {
+    try {
+      // Get the values in separated variables (its faster)
+      const [type, stat, wanted] = list[i];
+      const rval = {};
+
+      if (typeof type === "function") {
+        if (!type(item)) continue;
+        
+        if (typeof stat === "function") {
+          if (stat(item)) {
+            if (wanted && wanted.MaxQuantity && !isNaN(wanted.MaxQuantity)) {
+              num = NTIP.CheckQuantityOwned(type, stat);
+
+              if (num < wanted.MaxQuantity) {
+                result = 1;
+
+                break;
+              } else {
+                // attempt at inv fix for maxquantity
+                if (item.getParent() && item.getParent().name === me.name && item.isInStorage && num === wanted.MaxQuantity) {
+                  result = 1;
+
+                  break;
+                }
+              }
+            } else {
+              result = 1;
+
+              break;
+            }
+          } else if (!identified && result === 0) {
+            result = -1;
+            verbose && (rval.line = stringArray[i].file + " #" + stringArray[i].line);
+          }
+        } else {
+          if (wanted && wanted.MaxQuantity && !isNaN(wanted.MaxQuantity)) {
+            num = NTIP.CheckQuantityOwned(type, null);
+
+            if (num < wanted.MaxQuantity) {
+              result = 1;
+
+              break;
+            } else {
+              // attempt at inv fix for maxquantity
+              if (item.getParent() && item.getParent().name === me.name && item.isInStorage && num === wanted.MaxQuantity) {
+                result = 1;
+
+                break;
+              }
+            }
+          } else {
+            result = 1;
+
+            break;
+          }
+        }
+      } else if (typeof stat === "function") {
+        if (stat(item)) {
+          if (wanted && wanted.MaxQuantity && !isNaN(wanted.MaxQuantity)) {
+            num = NTIP.CheckQuantityOwned(null, stat);
+
+            if (num < wanted.MaxQuantity) {
+              result = 1;
+
+              break;
+            } else {
+              // attempt at inv fix for maxquantity
+              if (item.getParent() && item.getParent().name === me.name && item.isInStorage && num === wanted.MaxQuantity) {
+                result = 1;
+
+                break;
+              }
+            }
+          } else {
+            result = 1;
+
+            break;
+          }
+        } else if (!identified && result === 0) {
+          result = -1;
+          verbose && (rval.line = stringArray[i].file + " #" + stringArray[i].line);
+        }
+      }
+
+      rval.result = result;
+      if (result === 1) {
+        rval.line = stringArray[i].file + " #" + stringArray[i].line;
+      }
+
+      if (result !== 0) {
+        results.push(rval);
+      }
+    } catch (pickError) {
+      if ((e instanceof ScriptError)) {
+        throw e;
+      }
+      showConsole();
+
+      if (!entryList) {
+        Misc.errorReport("ÿc1Pickit error! Line # ÿc2" + stringArray[i].line + " ÿc1Entry: ÿc0" + stringArray[i].string + " (" + stringArray[i].file + ") Error message: " + pickError.message + " Trigger item: " + item.fname.split("\n").reverse().join(" "));
+
+        NTIP_CheckList.splice(i, 1); // Remove the element from the list
+      } else {
+        Misc.errorReport("ÿc1Pickit error in runeword config!");
+      }
+
+      result = 0;
+    }
+  }
+
+  return results;
 };
 
 /** @param {string} ch */
