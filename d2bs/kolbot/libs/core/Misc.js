@@ -972,11 +972,13 @@ const Misc = (function () {
           shrineLocs.sort(Sort.points);
           let coords = shrineLocs.shift();
 
-          // Skill.haveTK ? Pather.moveNear(coords[0], coords[1], 20) : Pather.moveTo(coords[0], coords[1], 2);
-          Pather.moveToEx(coords[0], coords[1], { minDist: Skill.haveTK ? 20 : 5, callback: () => {
-            let shrine = Game.getObject("shrine");
-            return !!shrine && shrine.x === coords[0] && shrine.y === coords[1];
-          } });
+          Pather.moveToEx(coords[0], coords[1], {
+            minDist: Skill.haveTK ? 20 : 5,
+            callback: function () {
+              let shrine = Game.getObject("shrine");
+              return !!shrine && shrine.x === coords[0] && shrine.y === coords[1];
+            }
+          });
 
           let shrine = Game.getObject("shrine");
 
@@ -1002,46 +1004,6 @@ const Misc = (function () {
       }
 
       return result;
-    },
-
-    /**
-     * Go to town when low on hp/mp or when out of potions. can be upgraded to check for curses etc.
-     * @deprecated - will be removed in future versions
-     * @returns {boolean}
-     */
-    townCheck: function () {
-      if (!me.canTpToTown()) return false;
-
-      let tTick = getTickCount();
-      let check = false;
-
-      if (Config.TownCheck && !me.inTown) {
-        try {
-          if (me.needPotions() || (Config.OpenChests.Enabled && me.needKeys())) {
-            check = true;
-          }
-        } catch (e) {
-          if ((e instanceof ScriptError)) {
-            throw e;
-          }
-          return false;
-        }
-
-        if (check) {
-          // check that townchicken is running - so we don't spam needing potions if it isn't
-          let townChick = getScript("threads/TownChicken.js");
-          if (!townChick || townChick && !townChick.running) {
-            return false;
-          }
-
-          townChick.send("townCheck");
-          console.log("townCheck check Duration: " + (getTickCount() - tTick));
-
-          return true;
-        }
-      }
-
-      return false;
     },
 
     /**

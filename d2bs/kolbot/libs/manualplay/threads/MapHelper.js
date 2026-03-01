@@ -77,7 +77,6 @@ function main () {
   Storage.Init();
   Runewords.init();
   Cubing.init();
-  LocalChat.init();
   
   addEventListener("scriptmsg", function (msg) {
     action = msg;

@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 /**
 *  @filename    AutoMule.js
 *  @author      kolton, theBGuy

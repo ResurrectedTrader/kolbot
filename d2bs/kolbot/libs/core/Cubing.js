@@ -832,10 +832,12 @@ const Cubing = {
 
   /**
    * @param {recipeObj} recipe 
-   * @returns {boolean}
+   * @returns {ItemUnit[] | boolean}
    */
   checkRecipe: function (recipe) {
+    /** @type {number[]} */
     let usedGids = [];
+    /** @type {ItemUnit[]} */
     let matchList = [];
 
     for (let i = 0; i < recipe.Ingredients.length; i += 1) {

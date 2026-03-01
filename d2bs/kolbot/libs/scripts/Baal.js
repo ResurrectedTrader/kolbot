@@ -70,7 +70,9 @@ const Baal = new Runnable(
     } });
 
     if (Config.PublicMode) {
-      announce();
+      if (!Config.Baal.Silent) {
+        announce();
+      }
       Pather.moveTo(15118, 5002);
       Pather.makePortal();
       say(Config.Baal.HotTPMessage);
@@ -82,7 +84,9 @@ const Baal = new Runnable(
     if (Config.PublicMode) {
       Pather.moveTo(15118, 5045);
       Pather.makePortal();
-      say(Config.Baal.SafeTPMessage);
+      if (!Config.Baal.Silent) {
+        say(Config.Baal.SafeTPMessage);
+      }
       Precast.doPrecast(true);
     }
 

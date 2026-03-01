@@ -221,7 +221,8 @@ const BaalAssistant = new Runnable(
           while (Misc.inMyParty(Leader)) {
             if (!secondAttempt && !safeCheck && !baalCheck
               && !ShrineStatus && !!Config.BaalAssistant.GetShrine
-              && me.inArea(sdk.areas.Harrogath)) {
+              && me.inArea(sdk.areas.Harrogath)
+            ) {
               if (!!Config.BaalAssistant.GetShrineWaitForHotTP) {
                 Misc.poll(() => hotCheck, Time.seconds(Config.BaalAssistant.Wait), 1000);
 

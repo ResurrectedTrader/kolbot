@@ -300,7 +300,9 @@
 
     this.killBaal = function (hurtPercent = 0) {
       if (me.inArea(sdk.areas.ThroneofDestruction)) {
-        Config.PublicMode && Loader.scriptName() === "Baal" && say(Config.Baal.BaalMessage);
+        if (Config.PublicMode && Loader.scriptName() === "Baal" && !Config.Baal.Silent) {
+          say(Config.Baal.BaalMessage);
+        }
         me.checkForMobs({ range: 30 }) && this.clearWaves(); // ensure waves are actually done
         Pather.moveTo(15090, 5008);
         Misc.poll(function () {

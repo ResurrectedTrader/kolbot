@@ -1537,7 +1537,9 @@ const Pather = {
               switch (targetArea) {
               case "random":
                 let validWps = this.nonTownWpAreas
-                  .filter(area => getWaypoint(this.wpAreas.indexOf(area)));
+                  .filter(function (area) {
+                    return getWaypoint(this.wpAreas.indexOf(area));
+                  });
                 if (!validWps.length) {
                   if (me.inTown && Pather.moveToExit(me.area + 1, true)) {
                     break;
@@ -1557,8 +1559,9 @@ const Pather = {
                 me.cancel();
                 console.log("Trying to get the waypoint: " + getAreaName(targetArea));
                 me.overhead("Trying to get the waypoint");
-                if (this.getWP(targetArea)) return true;
-
+                if (this.getWP(targetArea)) {
+                  return true;
+                }
                 throw new Error("Pather.useWaypoint: Failed to go to waypoint " + getAreaName(targetArea));
               }
 
@@ -1572,7 +1575,7 @@ const Pather = {
             console.warn("waypoint retry " + (i + 1));
             let retry = Math.min(i + 1, 5);
             let coord = CollMap.getRandCoordinate(me.x, -5 * retry, 5 * retry, me.y, -5 * retry, 5 * retry);
-            !!coord && this.moveTo(coord.x, coord.y);
+            !!coord && this.moveTo(coord.x, coord.y, 3);
             delay(200);
             Packet.flash(me.gid, pingDelay);
 

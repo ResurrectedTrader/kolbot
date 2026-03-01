@@ -344,6 +344,7 @@ declare global {
       HotTPMessage: string;
       SafeTPMessage: string;
       BaalMessage: string;
+      Silent: boolean;
     };
     BaalAssistant: {
       KillNihlathak: boolean;

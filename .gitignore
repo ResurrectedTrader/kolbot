@@ -55,3 +55,4 @@ d2bs/kolbot/libs/systems/gameaction/GameActionConfig.js
 d2bs/kolbot/libs/systems/automule/config/StarterConfig.js
 d2bs/kolbot/libs/systems/charrefresher/RefresherConfig.js
 d2bs/kolbot/libs/systems/lead/LeadConfig.js
+/d2bs/kolbot/libs/core/Overrides

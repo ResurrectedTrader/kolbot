@@ -525,7 +525,8 @@ let Config = {
     KillBaal: false,
     HotTPMessage: "Hot TP!",
     SafeTPMessage: "Safe TP!",
-    BaalMessage: "Baal!"
+    BaalMessage: "Baal!",
+    Silent: false
   },
   BaalAssistant: {
     KillNihlathak: false,

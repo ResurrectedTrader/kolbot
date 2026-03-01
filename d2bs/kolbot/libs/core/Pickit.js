@@ -119,7 +119,9 @@ const Pickit = {
    */
   canPick: function (unit) {
     if (!unit) return false;
-    if (sdk.quest.items.includes(unit.classid) && me.getItem(unit.classid)) return false;
+    if (sdk.quest.items.includes(unit.classid) && me.getItem(unit.classid)) {
+      return false;
+    }
 
     switch (unit.itemType) {
     case sdk.items.type.Gold:
@@ -283,13 +285,17 @@ const Pickit = {
     };
 
     // make sure we have essentials - no pickit files loaded
-    if (rval.result === Pickit.Result.UNWANTED && Config.PickitFiles.length === 0
-      && Pickit.essentials.includes(unit.itemType) && this.canPick(unit)) {
+    if (rval.result === Pickit.Result.UNWANTED
+      && Config.PickitFiles.length === 0
+      && Pickit.essentials.includes(unit.itemType)
+      && this.canPick(unit)
+    ) {
       return resultObj(Pickit.Result.WANTED, "Essentials");
     }
 
     if ((unit.classid === sdk.items.runes.Ort || unit.classid === sdk.items.runes.Ral)
-      && Cubing.repairIngredientCheck(unit)) {
+      && Cubing.repairIngredientCheck(unit)
+    ) {
       return resultObj(Pickit.Result.UTILITY, "Cubing Repair Ingredients");
     }
 
@@ -607,12 +613,16 @@ const Pickit = {
     let item = Game.getItem();
 
     if (item) {
+      /** @param {ItemUnit} check */
+      let sameItem = function (check) {
+        return (check.gid === item.gid);
+      };
       do {
         if (Pickit.ignoreList.has(item.gid)) continue;
         if (item.classid === sdk.items.Gold && item.distance <= 4 && Pickit.canPick(item)) {
           if (Pickit.pickItem(item, Pickit.Result.WANTED, "gold", 1)) continue;
         }
-        if (Pickit.pickList.some(el => el.gid === item.gid)) continue;
+        if (Pickit.pickList.some(sameItem)) continue;
         if (item.onGroundOrDropping && item.distance <= range) {
           Pickit.pickList.push(copyItem(item));
         }
