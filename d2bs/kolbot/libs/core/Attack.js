@@ -1423,7 +1423,7 @@ const Attack = {
     try {
       console.info(true, getAreaName(me.area), "clearLevelWalk-nearestNeighbourSearch");
       let graph = new Graph();
-      Graph.nearestNeighbourSearch(graph, function (room) {
+      Graph.adaptiveSearch(graph, function (room) {
         if (typeof cb === "function" && cb()) {
           throw new ScriptError("Clearing stopped by callback");
         }

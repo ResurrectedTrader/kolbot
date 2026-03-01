@@ -357,5 +357,338 @@
     }
   };
 
+  /**
+   * @typedef {Object} GraphAnalysis
+   * @property {number} vertexCount - Total number of vertices
+   * @property {number} avgDegree - Average neighbors per vertex
+   * @property {number} deadEndRatio - Ratio of dead-ends (degree <= 1) to total vertices
+   * @property {number} maxDegree - Maximum neighbors any vertex has
+   * @property {number} componentCount - Number of disconnected components
+   * @property {"linear" | "maze" | "open" | "hub"} mapType - Inferred map type
+   * @property {number} sizeWeight - Recommended size weight for scoring
+   * @property {number} distWeight - Recommended distance weight for scoring
+   */
+
+  /**
+   * Analyze graph structure to determine map characteristics and optimal tuning
+   * @param {Graph} graph
+   * @returns {GraphAnalysis}
+   */
+  Graph.analyzeGraph = function(graph) {
+    let vertices = graph.vertices;
+    let vertexCount = vertices.length;
+
+    if (vertexCount === 0) {
+      return {
+        vertexCount: 0,
+        avgDegree: 0,
+        deadEndRatio: 0,
+        maxDegree: 0,
+        componentCount: 0,
+        mapType: "open",
+        sizeWeight: 0.33,
+        distWeight: 0.7
+      };
+    }
+
+    // Calculate degree statistics
+    let degrees = vertices.map(function(v) {
+      return graph.nearbyVertices(v).length;
+    });
+    let totalDegree = degrees.reduce(function(sum, d) { return sum + d; }, 0);
+    let avgDegree = totalDegree / vertexCount;
+    let maxDegree = Math.max.apply(null, degrees);
+    let deadEnds = degrees.filter(function(d) { return d <= 1; }).length;
+    let deadEndRatio = deadEnds / vertexCount;
+
+    // Count connected components
+    let visited = new Set();
+    let componentCount = 0;
+    for (let vertex of vertices) {
+      if (visited.has(vertex.id)) continue;
+      componentCount++;
+      let queue = [vertex];
+      visited.add(vertex.id);
+      while (queue.length) {
+        let current = queue.shift();
+        let neighbors = graph.nearbyVertices(current);
+        for (let neighbor of neighbors) {
+          if (!visited.has(neighbor.id)) {
+            visited.add(neighbor.id);
+            queue.push(neighbor);
+          }
+        }
+      }
+    }
+
+    // Determine map type based on metrics
+    let mapType = "open";
+    let sizeWeight = 0.33;
+    let distWeight = 0.7;
+
+    if (avgDegree <= 1.5 && deadEndRatio < 0.15) {
+      // Low connectivity, few dead-ends = linear corridor
+      mapType = "linear";
+      sizeWeight = 0.2;  // Less important to clear small branches
+      distWeight = 0.8;  // Just follow the path
+    } else if (deadEndRatio > 0.3) {
+      // Many dead-ends = maze-like
+      mapType = "maze";
+      sizeWeight = 0.5;  // Very important to clear branches
+      distWeight = 0.5;  // Balance with distance
+    } else if (avgDegree > 3 && maxDegree > 5) {
+      // High connectivity = open area
+      mapType = "open";
+      sizeWeight = 0.25;
+      distWeight = 0.75; // Prefer nearest neighbor
+    } else if (componentCount > 1 || (maxDegree > 4 && avgDegree < 2.5)) {
+      // Multiple components or hub pattern
+      mapType = "hub";
+      sizeWeight = 0.4;  // Important to clear smaller sections
+      distWeight = 0.6;
+    }
+
+    return {
+      vertexCount: vertexCount,
+      avgDegree: avgDegree,
+      deadEndRatio: deadEndRatio,
+      maxDegree: maxDegree,
+      componentCount: componentCount,
+      mapType: mapType,
+      sizeWeight: sizeWeight,
+      distWeight: distWeight
+    };
+  };
+
+  /**
+   * Adaptive search that analyzes the graph and uses optimal algorithm/tuning
+   * @param {Graph} graph
+   * @param {(vertex: Vertex) => any} explore
+   * @param {"walk" | "teleport"} mode
+   */
+  Graph.adaptiveSearch = function(graph, explore, mode = "walk") {
+    let analysis = Graph.analyzeGraph(graph);
+
+    console.log("Graph Analysis: " + JSON.stringify({
+      vertices: analysis.vertexCount,
+      avgDegree: analysis.avgDegree.toFixed(2),
+      deadEndRatio: (analysis.deadEndRatio * 100).toFixed(1) + "%",
+      components: analysis.componentCount,
+      mapType: analysis.mapType
+    }));
+
+    // For linear maps, simple nearest neighbor is often sufficient and faster
+    if (analysis.mapType === "linear" && analysis.componentCount === 1) {
+      console.log("Using nearestNeighbourSearch for linear map");
+      return Graph.nearestNeighbourSearch(graph, explore, mode);
+    }
+
+    // For all other types, use cluster-aware with tuned weights
+    console.log("Using clusterAwareSearch with weights: size="
+      + analysis.sizeWeight + ", dist=" + analysis.distWeight);
+    return Graph.clusterAwareSearch(graph, explore, mode, analysis.sizeWeight, analysis.distWeight);
+  };
+
+  /**
+   * Cluster-aware nearest neighbor search that identifies connected components
+   * and prioritizes completing smaller/closer clusters before moving on.
+   * This prevents leaving isolated sections unexplored until the end.
+   * @param {Graph} graph
+   * @param {(vertex: Vertex) => any} explore
+   * @param {"walk" | "teleport"} mode
+   * @param {number} [sizeWeight=0.33] - Weight for component size in scoring
+   * @param {number} [distWeight=0.7] - Weight for distance in scoring
+   */
+  Graph.clusterAwareSearch = function(graph, explore, mode = "walk", sizeWeight = 0.33, distWeight = 0.7) {
+    /**
+     * Find all connected components in the remaining unvisited graph
+     * @returns {Vertex[][]}
+     */
+    function findComponents() {
+      let unvisited = graph.vertices.filter(filterSeen);
+      let components = [];
+      let visited = new Set();
+
+      for (let vertex of unvisited) {
+        if (visited.has(vertex.id)) continue;
+
+        // BFS to find all vertices in this component
+        let component = [];
+        let queue = [vertex];
+        visited.add(vertex.id);
+
+        while (queue.length) {
+          let current = queue.shift();
+          component.push(current);
+
+          let neighbors = graph.nearbyVertices(current).filter(function(v) {
+            return !v.seen && !visited.has(v.id);
+          });
+
+          for (let neighbor of neighbors) {
+            visited.add(neighbor.id);
+            queue.push(neighbor);
+          }
+        }
+
+        if (component.length > 0) {
+          components.push(component);
+        }
+      }
+
+      return components;
+    }
+
+    /**
+     * Find the entry point (closest vertex) into a component from current position
+     * @param {Vertex[]} component
+     * @returns {Vertex | null}
+     */
+    function findEntryPoint(component) {
+      return component.reduce(function(best, v) {
+        v.clearCache();
+        let dist = v.pathDistance(mode);
+        if (dist < best.dist) {
+          return { vertex: v, dist: dist };
+        }
+        return best;
+      }, { vertex: null, dist: Infinity }).vertex;
+    }
+
+    /**
+     * Score a component for priority (lower = should visit sooner)
+     * Factors: size (smaller first), distance to entry point
+     * @param {Vertex[]} component
+     * @returns {number}
+     */
+    function scoreComponent(component) {
+      let entry = findEntryPoint(component);
+      if (!entry) return Infinity;
+
+      let distanceToEntry = entry.pathDistance(mode);
+      let size = component.length;
+
+      // Normalize size (1 vertex = 0, larger = higher score)
+      let sizeScore = (size - 1) * 50;
+
+      return (sizeScore * sizeWeight) + (distanceToEntry * distWeight);
+    }
+
+    /**
+     * Calculate the "branch size" reachable from a vertex without backtracking through origin
+     * Smaller branches should be cleared first to avoid backtracking
+     * @param {Vertex} vertex - The vertex to measure from
+     * @param {Vertex} origin - The vertex we came from (don't count paths back through here)
+     * @param {Vertex[]} component - The component we're exploring
+     * @returns {number} - Number of unvisited vertices reachable
+     */
+    function getBranchSize(vertex, origin, component) {
+      let visited = new Set([origin.id, vertex.id]);
+      let queue = [vertex];
+      let count = 1;
+
+      while (queue.length) {
+        let current = queue.shift();
+        let neighbors = graph.nearbyVertices(current).filter(function(v) {
+          return !v.seen && component.includes(v) && !visited.has(v.id);
+        });
+
+        for (let neighbor of neighbors) {
+          visited.add(neighbor.id);
+          queue.push(neighbor);
+          count++;
+        }
+      }
+
+      return count;
+    }
+
+    /**
+     * Explore within a component using nearest-neighbor with dead-end awareness
+     * @param {Vertex[]} component
+     */
+    function exploreComponent(component) {
+      let currentVertex = findEntryPoint(component);
+
+      while (currentVertex && !currentVertex.seen) {
+        CollMap.drawRoom(currentVertex, "green", true);
+        explore(currentVertex);
+        currentVertex.markAsSeen();
+        CollMap.drawRoom(currentVertex, "purple", true);
+
+        // Handle movement during explore
+        if (!currentVertex.coordsInRoom(me.x, me.y)) {
+          let _newVertex = graph.vertexForRoom(getRoom(me.x, me.y));
+          if (_newVertex && component.includes(_newVertex)) {
+            currentVertex = _newVertex;
+          }
+        }
+
+        // Get unvisited neighbors within this component
+        let neighbors = graph.nearbyVertices(currentVertex)
+          .filter(function(v) {
+            return !v.seen && component.includes(v);
+          });
+
+        if (neighbors.length === 0) {
+          // No neighbors in component, find nearest unvisited in component
+          currentVertex = component
+            .filter(filterSeen)
+            .reduce(function(best, v) {
+              v.clearCache();
+              let dist = v.pathDistance(mode);
+              if (dist < best.dist) {
+                return { vertex: v, dist: dist };
+              }
+              return best;
+            }, { vertex: null, dist: Infinity }).vertex;
+        } else {
+          // Sort neighbors by branch size (smaller branches first to avoid backtracking)
+          neighbors.sort(function(a, b) {
+            let aBranchSize = getBranchSize(a, currentVertex, component);
+            let bBranchSize = getBranchSize(b, currentVertex, component);
+
+            // Prioritize smaller branches (clear them first)
+            if (aBranchSize !== bBranchSize) {
+              return aBranchSize - bBranchSize;
+            }
+
+            // Tie-breaker: use path distance
+            let distA = currentVertex.pathDistanceTo(a, mode);
+            let distB = currentVertex.pathDistanceTo(b, mode);
+            return distA - distB;
+          });
+
+          currentVertex = neighbors[0];
+        }
+
+        // Clear caches for next iteration
+        for (let v of graph.vertices) {
+          v.clearCache();
+        }
+      }
+    }
+
+    // Main loop
+    while (graph.vertices.some(function(v) { return !v.seen; })) {
+      let components = findComponents();
+
+      if (components.length === 0) break;
+
+      // Sort components by score (lower = higher priority)
+      components.sort(function(a, b) {
+        return scoreComponent(a) - scoreComponent(b);
+      });
+
+      let targetComponent = components[0];
+
+      for (let v of targetComponent) {
+        CollMap.drawRoom(v, "white", true);
+      }
+
+      exploreComponent(targetComponent);
+    }
+  };
+
   module.exports = Graph;
 })(module, require);
