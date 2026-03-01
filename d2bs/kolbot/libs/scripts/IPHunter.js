@@ -12,7 +12,8 @@ const IPHunter = new Runnable(
     const ip = Number(me.gameserverip.split(".")[3]);
 
     if (Config.IPHunter.IPList.includes(ip)) {
-      load("threads/antiidle.js");
+      require("../modules/workers/AntiIdle");
+      
       const foundMsg = "IPHunter: IP found! - [" + ip + "] Game is : " + me.gamename + "//" + me.gamepassword;
       D2Bot.printToConsole(foundMsg, sdk.colors.D2Bot.DarkGold);
       console.log(foundMsg);
@@ -36,8 +37,8 @@ const IPHunter = new Runnable(
 
         me.overhead(":D IP found! - [" + ip + "]");
         try {
-          Town.move("waypoint");
-          Town.move("stash");
+          Town.move(NPC.Akara, false);
+          Town.move("stash", false);
         } catch (e) {
           // ensure it doesnt leave game by failing to walk due to desyncing.
         }
