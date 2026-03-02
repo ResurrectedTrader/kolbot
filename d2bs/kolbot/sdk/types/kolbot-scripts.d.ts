@@ -62,6 +62,7 @@ export type KolbotScript =
   | "Questing"
   | "Radament"
   | "Rakanishu"
+  | "RaiseArmy"
   | "Rushee"
   | "Rusher"
   | "SealLeecher"
