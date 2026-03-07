@@ -2273,7 +2273,7 @@
     "mp3": 2273,
     "mp4": 2274,
     "mp5": 2275,
-    "hrb": 20434,
+    "hrb": 2276,
     "skc": 2277,
     "skf": 2278,
     "sku": 2279,
@@ -7799,8 +7799,21 @@
     LocaleStringName[LocaleStringID[k]] = k;
   }
 
+  const ClassIdToLocaleString = {};
+
+  for (let k in LocaleStringID) {
+    if (k.length <= 3 && Object.prototype.hasOwnProperty.call(NTIPAliasClassID, k)) {
+      ClassIdToLocaleString[NTIPAliasClassID[k]] = getLocaleString(LocaleStringID[k]);
+    }
+  }
+
   module.exports = {
     LocaleStringName: LocaleStringName,
-    LocaleStringID: LocaleStringID
+    LocaleStringID: LocaleStringID,
+    /**
+     * Maps class ID to locale string. Only includes items right now
+     * @type {Record<number, string>}
+     */
+    ClassIdToLocaleString: ClassIdToLocaleString
   };
 })(module);

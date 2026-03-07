@@ -2240,37 +2240,7 @@ const Town = {
       );
     }
 
-    const gemIdToName = {};
-    gemIdToName[sdk.items.gems.Chipped.Amethyst] = getLocaleString(sdk.locale.items.ChippedAmethyst);
-    gemIdToName[sdk.items.gems.Chipped.Topaz] = getLocaleString(sdk.locale.items.ChippedTopaz);
-    gemIdToName[sdk.items.gems.Chipped.Sapphire] = getLocaleString(sdk.locale.items.ChippedSapphire);
-    gemIdToName[sdk.items.gems.Chipped.Emerald] = getLocaleString(sdk.locale.items.ChippedEmerald);
-    gemIdToName[sdk.items.gems.Chipped.Ruby] = getLocaleString(sdk.locale.items.ChippedRuby);
-    gemIdToName[sdk.items.gems.Chipped.Diamond] = getLocaleString(sdk.locale.items.ChippedDiamond);
-    gemIdToName[sdk.items.gems.Flawed.Amethyst] = getLocaleString(sdk.locale.items.FlawedAmethyst);
-    gemIdToName[sdk.items.gems.Flawed.Topaz] = getLocaleString(sdk.locale.items.FlawedTopaz);
-    gemIdToName[sdk.items.gems.Flawed.Sapphire] = getLocaleString(sdk.locale.items.FlawedSapphire);
-    gemIdToName[sdk.items.gems.Flawed.Emerald] = getLocaleString(sdk.locale.items.FlawedEmerald);
-    gemIdToName[sdk.items.gems.Flawed.Ruby] = getLocaleString(sdk.locale.items.FlawedRuby);
-    gemIdToName[sdk.items.gems.Flawed.Diamond] = getLocaleString(sdk.locale.items.FlawedDiamond);
-    gemIdToName[sdk.items.gems.Normal.Amethyst] = getLocaleString(sdk.locale.items.Amethyst);
-    gemIdToName[sdk.items.gems.Normal.Topaz] = getLocaleString(sdk.locale.items.Topaz);
-    gemIdToName[sdk.items.gems.Normal.Sapphire] = getLocaleString(sdk.locale.items.Sapphire);
-    gemIdToName[sdk.items.gems.Normal.Emerald] = getLocaleString(sdk.locale.items.Emerald);
-    gemIdToName[sdk.items.gems.Normal.Ruby] = getLocaleString(sdk.locale.items.Ruby);
-    gemIdToName[sdk.items.gems.Normal.Diamond] = getLocaleString(sdk.locale.items.Diamond);
-    gemIdToName[sdk.items.gems.Flawless.Amethyst] = getLocaleString(sdk.locale.items.FlawlessAmethyst);
-    gemIdToName[sdk.items.gems.Flawless.Topaz] = getLocaleString(sdk.locale.items.FlawlessTopaz);
-    gemIdToName[sdk.items.gems.Flawless.Sapphire] = getLocaleString(sdk.locale.items.FlawlessSapphire);
-    gemIdToName[sdk.items.gems.Flawless.Emerald] = getLocaleString(sdk.locale.items.FlawlessEmerald);
-    gemIdToName[sdk.items.gems.Flawless.Ruby] = getLocaleString(sdk.locale.items.FlawlessRuby);
-    gemIdToName[sdk.items.gems.Flawless.Diamond] = getLocaleString(sdk.locale.items.FlawlessDiamond);
-    gemIdToName[sdk.items.gems.Perfect.Amethyst] = getLocaleString(sdk.locale.items.PerfectAmethyst);
-    gemIdToName[sdk.items.gems.Perfect.Topaz] = getLocaleString(sdk.locale.items.PerfectTopaz);
-    gemIdToName[sdk.items.gems.Perfect.Sapphire] = getLocaleString(sdk.locale.items.PerfectSapphire);
-    gemIdToName[sdk.items.gems.Perfect.Emerald] = getLocaleString(sdk.locale.items.PerfectEmerald);
-    gemIdToName[sdk.items.gems.Perfect.Ruby] = getLocaleString(sdk.locale.items.PerfectRuby);
-    gemIdToName[sdk.items.gems.Perfect.Diamond] = getLocaleString(sdk.locale.items.PerfectDiamond);
+    const { ClassIdToLocaleString } = require("./GameData/LocaleStringID");
 
     /**
      * @class
@@ -2298,13 +2268,13 @@ const Town = {
       name: {
         /** @this {GemUnit} */
         get: function () {
-          return gemIdToName[this.classid] || "Unknown Gem";
+          return ClassIdToLocaleString[this.classid] || "Unknown Gem";
         },
       },
       fname: {
         /** @this {GemUnit} */
         get: function () {
-          return gemIdToName[this.classid] || "Unknown Gem";
+          return ClassIdToLocaleString[this.classid] || "Unknown Gem";
         },
       },
     });

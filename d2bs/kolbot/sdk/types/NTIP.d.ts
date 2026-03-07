@@ -2,16 +2,20 @@ export {};
 declare global {
   const NTIPAliasType: Record<string, number>;
   const NTIPAliasClassID: Record<string, number>;
+  const NTIPAliasCodes: Record<string, number>;
   const NTIPAliasClass: Record<string, number>;
   const NTIPAliasQuality: Record<string, number>;
   const NTIPAliasFlag: Record<string, number>;
   const NTIPAliasColor: Record<string, number>;
   const NTIPAliasStat: Record<string, number>;
-  
+
   namespace NTIP {
     function addLine(itemString: string, fileName: string): boolean;
     function OpenFile(filepath: string, notify: boolean): boolean;
-    function CheckQuantityOwned(item_type: (item: ItemUnit) => boolean, item_stats: (item: ItemUnit) => boolean): number;
+    function CheckQuantityOwned(
+      item_type: (item: ItemUnit) => boolean,
+      item_stats: (item: ItemUnit) => boolean,
+    ): number;
     function Clear(): void;
     function generateTierFunc(tierType: string): (item: ItemUnit) => number;
     function GetTier(item: ItemUnit): number;
@@ -28,6 +32,10 @@ declare global {
     const _aliases: Map<string, string>;
     const _lists: Map<string, Record<string, number | string>>;
     function ParseLineInt(input: string, info: any): boolean;
-    function CheckItem(item: ItemUnit, entryList?: [] | false, verbose?: boolean): number | { line: string, result: number };
+    function CheckItem(
+      item: ItemUnit,
+      entryList?: [] | false,
+      verbose?: boolean,
+    ): number | { line: string; result: number };
   }
 }
