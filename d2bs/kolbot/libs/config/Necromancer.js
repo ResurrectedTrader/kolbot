@@ -34,6 +34,7 @@ function LoadConfig () {
     Config.BattleOrders.Wait = 10; // Duration to wait for players to join game in seconds (default: 10)
 
   Scripts.GetFade = false; // Get fade in River of Flames - only works if we are wearing an item with ctc Fade
+  Scripts.RaiseArmy = false; // Go through pindle portal and raise an army of skeletons, then return to town. Only works if necromancer is configured to raise skeletons and/or revives.
 
   // ## Team MF
   Config.MFLeader = false; // Set to true if you have one or more MFHelpers. Opens TP and gives commands when doing normal MF runs.
