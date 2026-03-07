@@ -11,6 +11,7 @@ const Town = {
   lastChores: 0,
   /** @type {Set<number>} */
   dontStashGids: new Set(),
+  choresActive: false,
 
   act: {
     1: {
@@ -123,10 +124,17 @@ const Town = {
 
   ignoredItemTypes: [
     // Items that won't be stashed
-    sdk.items.type.BowQuiver, sdk.items.type.CrossbowQuiver, sdk.items.type.Book,
-    sdk.items.type.Scroll, sdk.items.type.Key, sdk.items.type.HealingPotion,
-    sdk.items.type.ManaPotion, sdk.items.type.RejuvPotion, sdk.items.type.StaminaPotion,
-    sdk.items.type.AntidotePotion, sdk.items.type.ThawingPotion
+    sdk.items.type.BowQuiver,
+    sdk.items.type.CrossbowQuiver,
+    sdk.items.type.Book,
+    sdk.items.type.Scroll,
+    sdk.items.type.Key,
+    sdk.items.type.HealingPotion,
+    sdk.items.type.ManaPotion,
+    sdk.items.type.RejuvPotion,
+    sdk.items.type.StaminaPotion,
+    sdk.items.type.AntidotePotion,
+    sdk.items.type.ThawingPotion
   ],
 
   /**
@@ -157,6 +165,7 @@ const Town = {
     }
 
     try {
+      Town.choresActive = true;
       Pather.allowBroadcast = false;
       if (Config.FastPick && new RegExp(/[default.dbj|main.js]/gi).test(getScript(true).name)) {
         // shopping causes this to bug out sometimes so remove it for duration of chores
@@ -206,6 +215,7 @@ const Town = {
         addEventListener("itemaction", Pickit.itemEvent);
       }
       
+      Town.choresActive = false;
       Pather.allowBroadcast = true;
       Town.lastChores = getTickCount();
     }
@@ -1473,7 +1483,9 @@ const Town = {
   stash: function (stashGold = true) {
     if (!me.needStash()) return true;
 
-    me.cancelUIFlags();
+    if (!getUIFlag(sdk.uiflags.Stash)) {
+      me.cancelUIFlags();
+    }
 
     /** @type {ItemUnit[]} */
     let items = (Storage.Inventory.Compare(Config.Inventory) || [])
@@ -1511,7 +1523,8 @@ const Town = {
     // Stash gold
     if (stashGold) {
       if (me.getStat(sdk.stats.Gold) >= Config.StashGold
-        && me.getStat(sdk.stats.GoldBank) < 25e5 && Town.openStash()) {
+        && me.getStat(sdk.stats.GoldBank) < 25e5 && Town.openStash()
+      ) {
         gold(me.getStat(sdk.stats.Gold), 3);
         delay(1000); // allow UI to initialize
         me.cancel();
@@ -2227,9 +2240,42 @@ const Town = {
       );
     }
 
+    const gemIdToName = {};
+    gemIdToName[sdk.items.gems.Chipped.Amethyst] = getLocaleString(sdk.locale.items.ChippedAmethyst);
+    gemIdToName[sdk.items.gems.Chipped.Topaz] = getLocaleString(sdk.locale.items.ChippedTopaz);
+    gemIdToName[sdk.items.gems.Chipped.Sapphire] = getLocaleString(sdk.locale.items.ChippedSapphire);
+    gemIdToName[sdk.items.gems.Chipped.Emerald] = getLocaleString(sdk.locale.items.ChippedEmerald);
+    gemIdToName[sdk.items.gems.Chipped.Ruby] = getLocaleString(sdk.locale.items.ChippedRuby);
+    gemIdToName[sdk.items.gems.Chipped.Diamond] = getLocaleString(sdk.locale.items.ChippedDiamond);
+    gemIdToName[sdk.items.gems.Flawed.Amethyst] = getLocaleString(sdk.locale.items.FlawedAmethyst);
+    gemIdToName[sdk.items.gems.Flawed.Topaz] = getLocaleString(sdk.locale.items.FlawedTopaz);
+    gemIdToName[sdk.items.gems.Flawed.Sapphire] = getLocaleString(sdk.locale.items.FlawedSapphire);
+    gemIdToName[sdk.items.gems.Flawed.Emerald] = getLocaleString(sdk.locale.items.FlawedEmerald);
+    gemIdToName[sdk.items.gems.Flawed.Ruby] = getLocaleString(sdk.locale.items.FlawedRuby);
+    gemIdToName[sdk.items.gems.Flawed.Diamond] = getLocaleString(sdk.locale.items.FlawedDiamond);
+    gemIdToName[sdk.items.gems.Normal.Amethyst] = getLocaleString(sdk.locale.items.Amethyst);
+    gemIdToName[sdk.items.gems.Normal.Topaz] = getLocaleString(sdk.locale.items.Topaz);
+    gemIdToName[sdk.items.gems.Normal.Sapphire] = getLocaleString(sdk.locale.items.Sapphire);
+    gemIdToName[sdk.items.gems.Normal.Emerald] = getLocaleString(sdk.locale.items.Emerald);
+    gemIdToName[sdk.items.gems.Normal.Ruby] = getLocaleString(sdk.locale.items.Ruby);
+    gemIdToName[sdk.items.gems.Normal.Diamond] = getLocaleString(sdk.locale.items.Diamond);
+    gemIdToName[sdk.items.gems.Flawless.Amethyst] = getLocaleString(sdk.locale.items.FlawlessAmethyst);
+    gemIdToName[sdk.items.gems.Flawless.Topaz] = getLocaleString(sdk.locale.items.FlawlessTopaz);
+    gemIdToName[sdk.items.gems.Flawless.Sapphire] = getLocaleString(sdk.locale.items.FlawlessSapphire);
+    gemIdToName[sdk.items.gems.Flawless.Emerald] = getLocaleString(sdk.locale.items.FlawlessEmerald);
+    gemIdToName[sdk.items.gems.Flawless.Ruby] = getLocaleString(sdk.locale.items.FlawlessRuby);
+    gemIdToName[sdk.items.gems.Flawless.Diamond] = getLocaleString(sdk.locale.items.FlawlessDiamond);
+    gemIdToName[sdk.items.gems.Perfect.Amethyst] = getLocaleString(sdk.locale.items.PerfectAmethyst);
+    gemIdToName[sdk.items.gems.Perfect.Topaz] = getLocaleString(sdk.locale.items.PerfectTopaz);
+    gemIdToName[sdk.items.gems.Perfect.Sapphire] = getLocaleString(sdk.locale.items.PerfectSapphire);
+    gemIdToName[sdk.items.gems.Perfect.Emerald] = getLocaleString(sdk.locale.items.PerfectEmerald);
+    gemIdToName[sdk.items.gems.Perfect.Ruby] = getLocaleString(sdk.locale.items.PerfectRuby);
+    gemIdToName[sdk.items.gems.Perfect.Diamond] = getLocaleString(sdk.locale.items.PerfectDiamond);
+
     /**
      * @class
-     * @param {ItemUnit} gem 
+     * @param {ItemUnit} gem
+     * @implements {Partial<ItemUnit>} 
      */
     function GemUnit(gem) {
       this.itemType = gem.itemType;
@@ -2237,11 +2283,31 @@ const Town = {
       this.type = gem.type;
       this.mode = gem.mode;
       this.gid = gem.gid;
+      this.quality = gem.quality;
+      this.ilvl = gem.ilvl;
     }
     // eslint-disable-next-line no-unused-vars
     GemUnit.prototype.getFlag = function (flag) {
       return true;
     };
+
+    GemUnit.prototype.getStat = Unit.prototype.getStat;
+    GemUnit.prototype.getStatEx = Unit.prototype.getStatEx;
+
+    Object.defineProperties(GemUnit.prototype, {
+      name: {
+        /** @this {GemUnit} */
+        get: function () {
+          return gemIdToName[this.classid] || "Unknown Gem";
+        },
+      },
+      fname: {
+        /** @this {GemUnit} */
+        get: function () {
+          return gemIdToName[this.classid] || "Unknown Gem";
+        },
+      },
+    });
     
     /**
      * @param {ItemUnit} unit 

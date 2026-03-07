@@ -4,7 +4,7 @@
 *	@desc      locale string indexes from NameStr ids
 */
 (function (module) {
-  let LocaleStringID = {
+  const LocaleStringID = {
     "WarrivAct1IntroGossip1": 0,
     "WarrivAct1IntroPalGossip1": 1,
     "WarrivGossip1": 2,
@@ -7793,7 +7793,7 @@
     "MercX167": 22817
   };
 
-  let LocaleStringName = {};
+  const LocaleStringName = {};
 
   for (let k in LocaleStringID) {
     LocaleStringName[LocaleStringID[k]] = k;
