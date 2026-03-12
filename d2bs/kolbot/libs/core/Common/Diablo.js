@@ -252,7 +252,21 @@
       };
       sealOrder.forEach(function (seal) {
         if (_Diablo.diabloSpawned) return;
-        seals[seal]();
+        try {
+          seals[seal]();
+        } catch (e) {
+          if (e instanceof ScriptError) {
+            throw e;
+          }
+
+          if (e instanceof Error && e.message.includes("Failed to kill")) {
+            if (Loader.scriptName() === "DiabloHelper") {
+              console.warn(e);
+            } else {
+              throw e;
+            }
+          }
+        }
       });
     },
 
