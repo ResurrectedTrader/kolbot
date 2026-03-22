@@ -91,6 +91,8 @@
       
         return function () {
           if (Common.Diablo.done) return false;
+          // don't throw if we are doing chores
+          if (Town.choresActive) return true;
           // check every 1/4 second
           if (getTickCount() - diaTick < 250) return true;
           diaTick = getTickCount();
