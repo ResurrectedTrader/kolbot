@@ -9,7 +9,6 @@ include("systems/mulelogger/MuleLogger.js");
 
 /** @type {import("./GameAction").GameActionType} */
 const GameAction = {
-  /** @type {{ action: string, data: any } | null} */
   task: null,
   
   /**
@@ -19,10 +18,19 @@ const GameAction = {
   init: function (task) {
     try {
       GameAction.task = JSON.parse(task);
-      console.log("ÿc4GameActionÿc0: Task: ", GameAction.task);
+      const { action } = GameAction.task;
+      console.log("ÿc4GameActionÿc0: Task: " + action);
       
       if (this.task["data"] && typeof this.task.data === "string") {
         this.task.data = JSON.parse(this.task.data);
+      }
+
+      if (this.task.action === "doDrop" && this.task.data && Array.isArray(this.task.data.items)) {
+        /** @type {GameActionData} */
+        let data = (this.task.data);
+        for (let i = 0; i < data.items.length; i += 1) {
+          console.log("ÿc4GameActionÿc0: Item: " + data.items[i].title);
+        }
       }
 
       MuleLogger.LogNames = this.LogNames;
