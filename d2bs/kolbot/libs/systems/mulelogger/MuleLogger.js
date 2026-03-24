@@ -208,6 +208,7 @@ const MuleLogger = {
     const itemInfo = {
       id: unit.classid,
       code: unit.code,
+      mode: unit.mode,
       name: name,
       prefix: unit.prefix,
       suffix: unit.suffix,
@@ -230,7 +231,8 @@ const MuleLogger = {
       flags: unit.getFlags(),
       ethereal: unit.getFlag(sdk.items.flags.Ethereal),
       runeword: unit.getFlag(sdk.items.flags.Runeword),
-      stats: MuleLogger.dumpItemStats(unit)
+      stats: MuleLogger.dumpItemStats(unit),
+      equipped: unit.isEquipped,
     };
     
     let desc = (
