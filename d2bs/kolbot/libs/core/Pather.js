@@ -465,6 +465,14 @@ const Pather = {
       getUIFlag(this.cancelFlags[i]) && me.cancel();
     }
 
+    if (me.itemoncursor) {
+      console.warn("Pather.move: Item on cursor, dropping it to prevent pathing issues.");
+      let item = Game.getCursorUnit();
+      if (item) {
+        item.drop();
+      }
+    }
+
     if (typeof target.x !== "number" || typeof target.y !== "number") {
       throw new Error("move: Coords must be numbers");
     }
