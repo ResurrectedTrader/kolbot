@@ -264,21 +264,32 @@
       if (!unit || !copyUnit(unit).x || !unit.dead) {
         return false;
       }
-      if ([sdk.monsters.Council1, sdk.monsters.Council2, sdk.monsters.Council3].indexOf(unit.classid) === -1
-        && unit.spectype === sdk.monsters.spectype.All) {
+      const councilClassIds = [sdk.monsters.Council1, sdk.monsters.Council2, sdk.monsters.Council3];
+      if (councilClassIds.indexOf(unit.classid) === -1 && unit.spectype === sdk.monsters.spectype.All) {
         // why ignore all normal monsters?
+        return false;
+      }
+
+      const waterWatcherIds = [sdk.monsters.WaterWatcherHead, sdk.monsters.WaterWatcherLimb];
+      if (waterWatcherIds.includes(unit.classid)) {
         return false;
       }
 
       // monstats2 doesn't contain guest monsters info. sigh..
       if (unit.classid <= sdk.monsters.BurningDeadArcher2
-        && !getBaseStat("monstats2", unit.classid, "corpseSel")) {
+        && !getBaseStat("monstats2", unit.classid, "corpseSel")
+      ) {
         return false;
       }
 
       let states = [
-        sdk.states.FrozenSolid, sdk.states.Revive, sdk.states.Redeemed,
-        sdk.states.CorpseNoDraw, sdk.states.Shatter, sdk.states.RestInPeace, sdk.states.CorpseNoSelect
+        sdk.states.FrozenSolid,
+        sdk.states.Revive,
+        sdk.states.Redeemed,
+        sdk.states.CorpseNoDraw,
+        sdk.states.Shatter,
+        sdk.states.RestInPeace,
+        sdk.states.CorpseNoSelect
       ];
 
       return (unit.distance <= 25
