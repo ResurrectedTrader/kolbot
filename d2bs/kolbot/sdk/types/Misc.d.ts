@@ -47,7 +47,7 @@ declare global {
     errorReport(error: Error | string, script?: string): void;
     debugLog(msg: string): void;
     useMenu(id: number): boolean;
-    poll<T>(check: () => T, timeout?: number, sleep?: number): T | false;
+    poll<T>(check: () => T, timeout?: number, sleep?: number, useNativeDelay?: boolean): T | false;
     getUIFlags(excluded?: number[]): number[] | null;
     getQuestStates(questId: number): number[];
   }

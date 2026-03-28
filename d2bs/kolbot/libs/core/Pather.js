@@ -326,9 +326,12 @@ const Pather = {
       if (!nodes.length) return (spotSettings.returnSpotOnError ? spot : { x: me.x, y: me.y });
     }
 
-    return (nodes.find((node) => getDistance(spot.x, spot.y, node.x, node.y) < distance
-      && Pather.checkSpot(node.x, node.y, spotSettings.coll))
-      || (spotSettings.returnSpotOnError ? spot : { x: me.x, y: me.y }));
+    return (nodes.find(function (node) {
+      return (
+        getDistance(spot.x, spot.y, node.x, node.y) < distance
+        && Pather.checkSpot(node.x, node.y, spotSettings.coll)
+      );
+    }) || (spotSettings.returnSpotOnError ? spot : { x: me.x, y: me.y }));
   },
 
   /**
@@ -722,7 +725,9 @@ const Pather = {
    * @todo does this need a validLocation check? - maybe if we fail once check the spot
    */
   teleportTo: function (x, y, maxRange = 5) {
-    for (let i = 0; i < 3; i += 1) {
+    const node = new PathNode(x, y);
+    
+    for (let i = 0; i < 3; i++) {
       Config.PacketCasting > 0
         ? Packet.teleport(x, y)
         : Skill.cast(sdk.skills.Teleport, sdk.skills.hand.Right, x, y);
@@ -730,7 +735,7 @@ const Pather = {
       let pingDelay = i === 0 ? 150 : me.getPingDelay();
 
       while (getTickCount() - tick < Math.max(500, pingDelay * 2 + 200)) {
-        if ([x, y].distance < maxRange) {
+        if (node.distance < maxRange) {
           return true;
         }
 
@@ -900,7 +905,7 @@ const Pather = {
           for (let i = 0; i < 3; i++) {
             Misc.click(0, 0, door);
 
-            if (Misc.poll(() => door.mode === sdk.objects.mode.Active, 1000, 30)) {
+            if (Misc.poll(function () { return door.mode === sdk.objects.mode.Active; }, 1000, 30)) {
               return true;
             }
 
@@ -1091,7 +1096,9 @@ const Pather = {
     }
 
     delay(40);
-    Misc.poll(() => me.gameReady, 500, 100);
+    Misc.poll(function () {
+      return me.gameReady;
+    }, 500, 100);
 
     let unit = presetUnit.realCoords();
 
@@ -1130,7 +1137,9 @@ const Pather = {
     }
 
     delay(40);
-    Misc.poll(() => me.gameReady, 500, 100);
+    Misc.poll(function () {
+      return me.gameReady;
+    }, 500, 100);
     let { x, y } = presetUnit.realCoords();
 
     return this.moveTo(x + offX, y + offY, 3, clearPath, pop);
@@ -1166,7 +1175,9 @@ const Pather = {
     }
 
     delay(40);
-    Misc.poll(() => me.gameReady, 500, 100);
+    Misc.poll(function () {
+      return me.gameReady;
+    }, 500, 100);
     let { x, y } = presetUnit.realCoords();
 
     return this.moveToEx(x + offX, y + offY, givenSettings);
@@ -1197,7 +1208,9 @@ const Pather = {
     }
 
     delay(40);
-    Misc.poll(() => me.gameReady, 500, 100);
+    Misc.poll(function () {
+      return me.gameReady;
+    }, 500, 100);
     let { x, y } = presetUnit.realCoords();
 
     return this.moveToEx(x + offX, y + offY, givenSettings);
@@ -1223,7 +1236,9 @@ const Pather = {
     for (let currTarget of areas) {
       console.info(null, getAreaName(me.area) + "ÿc8 --> ÿc0" + getAreaName(currTarget));
 
-      const area = Misc.poll(() => getArea(me.area));
+      const area = Misc.poll(function () {
+        return getArea(me.area);
+      });
       if (!area) throw new Error("moveToExit: error in getArea()");
 
       /** @type {Array<Exit>} */
@@ -1239,7 +1254,7 @@ const Pather = {
       if (checkExits.length > 0) {
         // if there are multiple exits to the same location find the closest one
         let currExit = checkExits.length > 1
-          ? (() => {
+          ? (function () {
             let useExit = checkExits.shift(); // assign the first exit as a possible result
             let dist = getDistance(me.x, me.y, useExit.x, useExit.y);
             while (checkExits.length > 0) {
@@ -1263,7 +1278,9 @@ const Pather = {
 
           delay(200);
           console.log("ÿc7(moveToExit) :: ÿc0Retry: " + (retry + 1));
-          Misc.poll(() => me.gameReady, 1000, 200);
+          Misc.poll(function () {
+            return me.gameReady;
+          }, 1000, 200);
         }
 
         if (use || currTarget !== finalDest) {
@@ -1300,11 +1317,15 @@ const Pather = {
   getDistanceToExit: function (area, exit) {
     area === undefined && (area = me.area);
     exit === undefined && (exit = me.area + 1);
-    let areaToCheck = Misc.poll(() => getArea(area));
+    let areaToCheck = Misc.poll(function () {
+      return getArea(area);
+    });
     if (!areaToCheck) throw new Error("Couldn't get area info for " + getAreaName(area));
     let exits = areaToCheck.exits;
     if (!exits.length) throw new Error("Failed to find exits");
-    let loc = exits.find(a => a.target === exit);
+    let loc = exits.find(function (a) {
+      return a.target === exit;
+    });
     console.debug(area, exit, loc);
     return loc ? [loc.x, loc.y].distance : Infinity;
   },
@@ -1317,11 +1338,15 @@ const Pather = {
   getExitCoords: function (area, exit) {
     area === undefined && (area = me.area);
     exit === undefined && (exit = me.area + 1);
-    let areaToCheck = Misc.poll(() => getArea(area));
+    let areaToCheck = Misc.poll(function () {
+      return getArea(area);
+    });
     if (!areaToCheck) throw new Error("Couldn't get area info for " + getAreaName(area));
     let exits = areaToCheck.exits;
     if (!exits.length) throw new Error("Failed to find exits");
-    let loc = exits.find(a => a.target === exit);
+    let loc = exits.find(function (a) {
+      return a.target === exit;
+    });
     console.debug(area, exit, loc);
     return loc ? { x: loc.x, y: loc.y } : false;
   },
@@ -1334,7 +1359,9 @@ const Pather = {
   getNearestRoom: function (area) {
     let x, y, minDist = 10000;
 
-    let room = Misc.poll(() => getRoom(area), 1000, 200);
+    let room = Misc.poll(function () {
+      return getRoom(area);
+    }, 1000, 200);
     if (!room) return false;
 
     do {
@@ -1393,7 +1420,9 @@ const Pather = {
    */
   openUnit: function (type, id) {
     /** @type {ObjectUnit | Tile} */
-    let unit = Misc.poll(() => getUnit(type, id), 1000, 200);
+    let unit = Misc.poll(function () {
+      return getUnit(type, id);
+    }, 1000, 200);
     if (!unit) throw new Error("openUnit: Unit not found. ID: " + unit);
     if (unit.mode !== sdk.objects.mode.Inactive) return true;
 
@@ -1409,7 +1438,9 @@ const Pather = {
    */
   useUnit: function (type, id, targetArea) {
     /** @type {ObjectUnit | Tile} */
-    let unit = Misc.poll(() => getUnit(type, id), 2000, 200);
+    let unit = Misc.poll(function () {
+      return getUnit(type, id);
+    }, 2000, 200);
     if (!unit) {
       throw new Error(
         "useUnit: Unit not found. TYPE: " + type + " ID: " + id
@@ -1481,12 +1512,15 @@ const Pather = {
       if (me.inTown) {
         if (me.inArea(sdk.areas.LutGholein)) {
           let npc = Game.getNPC(NPC.Warriv);
+          let checkA1Success = function () {
+            return me.gameReady && me.inArea(sdk.areas.RogueEncampment);
+          };
 
           if (!!npc && npc.distance < 50) {
             if (npc && npc.openMenu()) {
               Misc.useMenu(sdk.menu.GoWest);
 
-              if (!Misc.poll(() => me.gameReady && me.inArea(sdk.areas.RogueEncampment), 2000, 100)) {
+              if (!Misc.poll(checkA1Success, 2000, 100, true)) {
                 throw new Error("Failed to go to act 1 using Warriv");
               }
               if (me.inArea(targetArea)) {
@@ -1611,7 +1645,9 @@ const Pather = {
           }
 
           // In case lag causes the wp menu to stay open
-          Misc.poll(() => me.gameReady, 2000, 100) && getUIFlag(sdk.uiflags.Waypoint) && me.cancelUIFlags();
+          Misc.poll(function () {
+            return me.gameReady;
+          }, 2000, 100) && getUIFlag(sdk.uiflags.Waypoint) && me.cancelUIFlags();
         }
 
         Packet.flash(me.gid, pingDelay);

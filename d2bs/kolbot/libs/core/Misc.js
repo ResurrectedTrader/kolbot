@@ -1152,17 +1152,19 @@ const Misc = (function () {
      * @param {function(): T} check 
      * @param {number} [timeout=6000] 
      * @param {number} [sleep=40] 
+     * @param {boolean} [useNativeDelay=false] - use native delay function instead of alloying background processing during the wait time
      * @returns {T | false}
      */
-    poll: function (check, timeout = 6000, sleep = 40) {
+    poll: function (check, timeout = 6000, sleep = 40, useNativeDelay = false) {
       let ret, start = getTickCount();
+      let delayFunc = useNativeDelay ? delay : nativeDelay;
 
       while (getTickCount() - start <= timeout) {
         if ((ret = check())) {
           return ret;
         }
 
-        delay(sleep);
+        delayFunc(sleep);
       }
 
       return false;
