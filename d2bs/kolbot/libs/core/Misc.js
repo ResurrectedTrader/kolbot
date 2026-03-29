@@ -1157,7 +1157,7 @@ const Misc = (function () {
      */
     poll: function (check, timeout = 6000, sleep = 40, useNativeDelay = false) {
       let ret, start = getTickCount();
-      let delayFunc = useNativeDelay ? delay : nativeDelay;
+      let delayFunc = useNativeDelay ? nativeDelay : delay;
 
       while (getTickCount() - start <= timeout) {
         if ((ret = check())) {
