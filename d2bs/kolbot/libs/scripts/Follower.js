@@ -321,7 +321,7 @@ const Follower = new Runnable(
       ],
       [
         "staff", () => {
-          Pather.journeyTo(sdk.areas.HallsoftheDeadLvl3);
+          Pather.journeyTo(sdk.areas.MaggotLairLvl3);
           Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.ShaftoftheHoradricStaffChest);
         }
       ],
