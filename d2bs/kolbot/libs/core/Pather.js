@@ -1490,7 +1490,7 @@ const Pather = {
       break;
     default:
       if (typeof targetArea !== "number") throw new Error("useWaypoint: Invalid targetArea parameter");
-      if (this.wpAreas.indexOf(targetArea) < 0) throw new Error("useWaypoint: Invalid area");
+      if (Pather.wpAreas.indexOf(targetArea) < 0) throw new Error("useWaypoint: Invalid area");
 
       break;
     }
@@ -1580,7 +1580,7 @@ const Pather = {
               case "random":
                 let validWps = this.nonTownWpAreas
                   .filter(function (area) {
-                    return getWaypoint(this.wpAreas.indexOf(area));
+                    return getWaypoint(Pather.wpAreas.indexOf(area));
                   });
                 if (!validWps.length) {
                   if (me.inTown && Pather.moveToExit(me.area + 1, true)) {
@@ -1597,7 +1597,7 @@ const Pather = {
                 return true;
               }
 
-              if (!getWaypoint(this.wpAreas.indexOf(targetArea))) {
+              if (!getWaypoint(Pather.wpAreas.indexOf(targetArea))) {
                 me.cancel();
                 console.log("Trying to get the waypoint: " + getAreaName(targetArea));
                 me.overhead("Trying to get the waypoint");
@@ -2014,7 +2014,7 @@ const Pather = {
       target = this.plotCourse(area, me.area);
     } else {
       target = { course: [sdk.areas.CanyonofMagic, sdk.areas.DurielsLair], useWP: false };
-      this.wpAreas.indexOf(me.area) === -1 && (target.useWP = true);
+      Pather.wpAreas.indexOf(me.area) === -1 && (target.useWP = true);
     }
 
     console.info(true, "Course :: " + target.course, "journeyTo");
@@ -2056,14 +2056,14 @@ const Pather = {
       if (!me.inTown) {
         Precast.doPrecast(false);
 
-        if (this.wpAreas.includes(currArea)
-          && !getWaypoint(this.wpAreas.indexOf(currArea))) {
+        if (Pather.wpAreas.includes(currArea)
+          && !getWaypoint(Pather.wpAreas.indexOf(currArea))) {
           this.getWP(currArea);
         }
       }
 
       if (me.inTown && this.nextAreas[currArea] !== targetArea
-        && this.wpAreas.includes(targetArea) && getWaypoint(this.wpAreas.indexOf(targetArea))) {
+        && Pather.wpAreas.includes(targetArea) && getWaypoint(Pather.wpAreas.indexOf(targetArea))) {
         this.useWaypoint(targetArea, !Pather.initialized);
         Precast.doPrecast(false);
       } else if (currArea === sdk.areas.StonyField && targetArea === sdk.areas.Tristram) {
