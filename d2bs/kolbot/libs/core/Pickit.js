@@ -299,9 +299,15 @@ const Pickit = {
       return resultObj(Pickit.Result.UTILITY, "Cubing Repair Ingredients");
     }
 
-    if (CraftingSystem.checkItem(unit)) return resultObj(Pickit.Result.CRAFTING, "Crafting System");
-    if (Cubing.checkItem(unit)) return resultObj(Pickit.Result.CUBING, "Cubing");
-    if (Runewords.checkItem(unit)) return resultObj(Pickit.Result.RUNEWORD, "Runewords");
+    if (CraftingSystem.checkItem(unit)) {
+      return resultObj(Pickit.Result.CRAFTING, "Crafting System");
+    }
+    if (Cubing.checkItem(unit)) {
+      return resultObj(Pickit.Result.CUBING, "Cubing");
+    }
+    if (Runewords.checkItem(unit)) {
+      return resultObj(Pickit.Result.RUNEWORD, "Runewords");
+    }
 
     // if Gemhunting, pick Item for Cubing, if no other system needs it
     if (Scripts.GemHunter && rval.result === Pickit.Result.UNWANTED) {
@@ -339,7 +345,9 @@ const Pickit = {
         || (me.gold < me.getRepairCost())
       )) {
       // Gold doesn't ta=ke up room, just pick it up
-      if (unit.classid === sdk.items.Gold) return resultObj(Pickit.Result.WANTED, "LowGold");
+      if (unit.classid === sdk.items.Gold) {
+        return resultObj(Pickit.Result.WANTED, "LowGold");
+      }
 
       if (!this.invoLocked) {
         const itemValue = unit.getItemCost(sdk.items.cost.ToSell);
@@ -658,7 +666,8 @@ const Pickit = {
       // Check if the item unit is still valid and if it's on ground or being dropped
       // Don't pick items behind walls/obstacles when walking
       if (_item.onGroundOrDropping
-          && (Pather.useTeleport() || me.inTown || !checkCollision(me, _item, sdk.collision.BlockWall))) {
+          && (Pather.useTeleport() || me.inTown || !checkCollision(me, _item, sdk.collision.BlockWall))
+      ) {
         // Check if the item should be picked
         let status = this.checkItem(_item);
 
@@ -749,11 +758,18 @@ const Pickit = {
     for (let gid of this.gidList) {
       _removeList.push(gid);
       item = Game.getItem(-1, -1, gid);
-      if (item && item.onGroundOrDropping
-        && (!Town.ignoreType(item.itemType) || (item.itemType >= sdk.items.type.HealingPotion
-        && item.itemType <= sdk.items.type.RejuvPotion))
+      if (item
+        && item.onGroundOrDropping
+        && (
+          !Town.ignoreType(item.itemType)
+          || (
+            item.itemType >= sdk.items.type.HealingPotion
+            && item.itemType <= sdk.items.type.RejuvPotion
+          )
+        )
         && item.itemType !== sdk.items.type.Gold
-        && getDistance(me, item) <= range) {
+        && getDistance(me, item) <= range
+      ) {
         itemList.push(copyUnit(item));
       }
     }
@@ -773,7 +789,8 @@ const Pickit = {
         let status = this.checkItem(item);
 
         if (status.result && this.canPick(item)
-          && (Storage.Inventory.CanFit(item) || Pickit.essentials.includes(item.itemType))) {
+          && (Storage.Inventory.CanFit(item) || Pickit.essentials.includes(item.itemType))
+        ) {
           this.pickItem(item, status.result, status.line + " / (fastpick)", retry);
         }
       }

@@ -513,6 +513,11 @@ NTIP.IsSyntaxInt = function (ch) {
   );
 };
 
+/**
+ * @desc Parses [alias]in() and [alias]notin() syntax in NIP and converts them to standard syntax.
+ * For example, [type]in(armor, weapon) will be converted to ([type] == armor || [type] == weapon)
+ * and [name]notin(ring, amulet) will be converted to ([name] != ring && [name] != amulet)
+ */
 NTIP.parseAliasIn = {
   in: "\[([^\]]+)\]in\(",
   notin: "\[([^\]]+)\]notin\(",

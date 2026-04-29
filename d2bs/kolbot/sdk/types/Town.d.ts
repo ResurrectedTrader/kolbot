@@ -5,17 +5,21 @@ declare global {
     let sellTimer: number;
     let lastChores: number;
     const dontStashGids: Set<number>;
+    let choresActive: boolean;
 
-    const tasks: Map<Act, {
-      Heal: NPC;
-      Shop: NPC;
-      Gamble: NPC;
-      Repair: NPC;
-      Merc: NPC;
-      Key: NPC;
-      CainID: NPC;
-    }>;
-    const ignoredItemTypes: any[];
+    const tasks: Map<
+      Act,
+      {
+        Heal: NPC;
+        Shop: NPC;
+        Gamble: NPC;
+        Repair: NPC;
+        Merc: NPC;
+        Key: NPC;
+        CainID: NPC;
+      }
+    >;
+    const ignoredItemTypes: number[];
     function needPotions(): boolean;
     function doChores(repair?: boolean): boolean;
     function npcInteract(name?: string, cancel?: boolean): boolean | NPCUnit;
@@ -43,7 +47,10 @@ declare global {
     function needGamble(): boolean;
     function getGambledItem(list?: any[]): false | ItemUnit;
     function buyPots(quantity?: number, type?: string | number, drink?: boolean, force?: boolean, npc?: Unit): boolean;
-    function drinkPots(type?: string | number, log?: boolean): {
+    function drinkPots(
+      type?: string | number,
+      log?: boolean,
+    ): {
       potName: string;
       quantity: number;
     };

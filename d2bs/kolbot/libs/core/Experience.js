@@ -134,6 +134,8 @@ const Experience = {
       if (me.getStat(sdk.stats.Level) > DataFile.getStats().level) {
         D2Bot.printToConsole("Congrats! You gained a level. Current level:" + me.getStat(sdk.stats.Level), sdk.colors.D2Bot.Green);
       }
+    } else {
+      D2Bot.printToConsole("[Game: " + me.gamename + (me.gamepassword ? "//" + me.gamepassword : "") + getGameTime + "]");
     }
   }
 };

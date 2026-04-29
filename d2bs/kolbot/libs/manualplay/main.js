@@ -281,7 +281,7 @@ function main () {
   try {
     while (true) {
       while (!me.area || !me.gameReady) {
-        delay(100);
+        nativeDelay(100);
       }
 
       let hideFlagFound = false;

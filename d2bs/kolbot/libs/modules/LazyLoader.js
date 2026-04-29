@@ -110,6 +110,9 @@
             return typeof value === "function" ? value.bind(instance) : value;
           }
         }
+        if (!target.hasOwnProperty(property)) {
+          console.warn("Attempted to access unknown property: " + String(property));
+        }
         return target[property];
       },
       
