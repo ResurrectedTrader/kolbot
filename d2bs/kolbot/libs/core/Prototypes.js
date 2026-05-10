@@ -839,12 +839,22 @@ Unit.prototype.startTrade = function (mode) {
   if (this.type !== sdk.unittype.NPC) throw new Error("Unit.startTrade: Must be used on NPCs.");
   console.log("Starting " + mode + " at " + this.name);
   if (getUIFlag(sdk.uiflags.Shop)) return true;
-
-  const menuId = mode === "Gamble"
-    ? sdk.menu.Gamble
-    : mode === "Repair"
-      ? sdk.menu.TradeRepair
-      : sdk.menu.Trade;
+  
+  const unitName = this.name;
+  const menuId = (function (mode) {
+    switch (true) {
+    case mode === "gamble":
+      return sdk.menu.Gamble;
+    case mode === "repair":
+      return sdk.menu.TradeRepair;
+    case mode === "shop" && String.isEqual(NPC.Charsi, unitName):
+      return sdk.menu.TradeRepair;
+    case mode === "shop":
+      return sdk.menu.Trade;
+    default:
+      throw new Error("Unit.startTrade: Invalid mode " + mode);
+    }
+  })(mode.toLowerCase());
 
   for (let i = 0; i < 3; i += 1) {
     // Incremental delay on retries
