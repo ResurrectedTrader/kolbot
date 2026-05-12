@@ -1372,6 +1372,7 @@ declare global {
     AnnounceGames: boolean;
     AnnounceMessage: string;
     AfterGameMessage: string;
+    GameDescription: string;
 
     /**
      * Seconds to wait before opening the join game window after a game
