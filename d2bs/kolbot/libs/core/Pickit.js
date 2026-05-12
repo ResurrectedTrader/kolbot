@@ -390,11 +390,28 @@ const Pickit = {
       this.name = unit.name;
       this.color = Item.color(unit);
       this.gold = unit.getStat(sdk.stats.Gold);
-      this.dist = (unit.distance || Infinity);
-      this.useTk = (Skill.haveTK && Pickit.tkable.includes(this.type)
-        && this.dist > 5 && this.dist < 20 && !checkCollision(me, unit, sdk.collision.WallOrRanged));
+      this.x = unit.x;
+      this.y = unit.y;
+      this.area = unit.area;
+      this._useTk = (Skill.haveTK && Pickit.tkable.includes(this.type));
       this.picked = false;
     }
+
+    Object.defineProperty(ItemStats.prototype, "useTk", {
+      get: function () {
+        if (!this._useTk) return false;
+        let dist = this.distance;
+        let coll = CollMap.checkColl(me, this, sdk.collision.WallOrRanged);
+        return dist > 5 && dist < 20 && !coll;
+      },
+      /**
+       * @this {ItemStats}
+       * @param {boolean} value 
+       */
+      set: function (value) {
+        this._useTk = value;
+      }
+    });
 
     const itemCount = me.itemcount;
     const cancelFlags = [
@@ -409,7 +426,7 @@ const Pickit = {
     if (!item.onGroundOrDropping) return false;
 
     if (cancelFlags.some(getUIFlag)) {
-      delay(500);
+      nativeDelay(500);
       me.cancel(0);
     }
 
@@ -666,7 +683,11 @@ const Pickit = {
       // Check if the item unit is still valid and if it's on ground or being dropped
       // Don't pick items behind walls/obstacles when walking
       if (_item.onGroundOrDropping
-          && (Pather.useTeleport() || me.inTown || !checkCollision(me, _item, sdk.collision.BlockWall))
+          && (
+            Pather.useTeleport()
+            || me.inTown
+            || !checkCollision(me, _item, sdk.collision.BlockWall)
+          )
       ) {
         // Check if the item should be picked
         let status = this.checkItem(_item);
@@ -710,7 +731,10 @@ const Pickit = {
             // Can't make room - trigger automule
             if (copyUnit(_item).x !== undefined) {
               Item.logger("No room for", _item);
-              console.warn("ÿc7Not enough room for " + Item.color(_item) + _item.name);
+              console.warn(
+                "ÿc7Not enough room for " + Item.color(_item) + _item.name
+                + " ÿc0(" + Storage.Inventory.UsedSpacePercent() + "% full)"
+              );
               Pickit.ignoreList.add(_item.gid);
               if (canUseMule) {
                 console.debug("Attempt to trigger automule");
