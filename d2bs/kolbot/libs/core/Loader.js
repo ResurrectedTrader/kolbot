@@ -263,6 +263,11 @@ const Loader = {
                   postAction(ctx);
                 }
               }
+
+              // run town chores on last script - prevents muling due to leftover items in inventory
+              if (Loader.scriptIndex === Loader.scriptList.length - 1) {
+                Town.doChores();
+              }
             }
           }
         } catch (error) {

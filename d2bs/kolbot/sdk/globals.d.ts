@@ -20,6 +20,7 @@
 /// <reference path="./types/Common.d.ts" />
 /// <reference path="./types/CollMap.d.ts" />
 /// <reference path="./types/ClassAttack.d.ts" />
+/// <reference path="../libs/systems/torch/TorchSystem.d.ts" />
 
 declare global {
   type IncludePath = import("./types/include-paths").IncludePath;
