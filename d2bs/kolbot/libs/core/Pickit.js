@@ -701,6 +701,12 @@ const Pickit = {
             me.fieldID() && (canFit = (_item.gid !== undefined && Storage.Inventory.CanFit(_item)));
           }
 
+          if (!_item || _item.gid === undefined) {
+            console.warn("Item disappeared or became invalid while trying to pick " + itemName);
+            Pickit.pickList.shift();
+            continue;
+          }
+
           // Try to make room by selling items in town
           if (!canFit) {
             let usedSpace = Storage.Inventory.UsedSpacePercent();
