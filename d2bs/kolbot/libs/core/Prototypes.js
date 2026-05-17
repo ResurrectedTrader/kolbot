@@ -848,6 +848,10 @@ Unit.prototype.startTrade = function (mode) {
     case mode === "repair":
       return sdk.menu.TradeRepair;
     case mode === "shop" && String.isEqual(NPC.Charsi, unitName):
+    case mode === "shop" && String.isEqual(NPC.Fara, unitName):
+    case mode === "shop" && String.isEqual(NPC.Hratli, unitName):
+    case mode === "shop" && String.isEqual(NPC.Halbu, unitName):
+    case mode === "shop" && String.isEqual(NPC.Larzuk, unitName):
       return sdk.menu.TradeRepair;
     case mode === "shop":
       return sdk.menu.Trade;
