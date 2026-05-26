@@ -395,6 +395,10 @@ const Town = {
         let npcs = Town.tasks.get(me.act);
         let _needPots = me.needPotions();
         let _needRepair = me.needRepair().length > 0;
+        let _needScrolls = (
+          me.checkScrolls(sdk.items.TomeofTownPortal) < 13
+          || Config.FieldID.Enabled && me.checkScrolls(sdk.items.TomeofIdentify) < 13
+        );
         if (_needPots && _needRepair) {
           if (me.act === 2) {
             choices = new Set([npcs.Key, npcs.Repair]);
@@ -405,9 +409,17 @@ const Town = {
           }
         } else if (!_needPots && _needRepair) {
           choices.add(npcs.Repair);
-        } else if (!_needPots && !_needRepair) {
+        } else if (!_needPots && !_needRepair && !_needScrolls) {
           choices = new Set([npcs.Key, npcs.Repair, npcs.Gamble, npcs.Shop]);
         }
+
+        if (_needScrolls) {
+          choices.add(npcs.Shop);
+          choices.delete(npcs.Repair);
+          choices.delete(npcs.Gamble);
+          choices.delete(npcs.Key);
+        }
+
         if (choices.size) {
           console.log("closest npc choices", choices);
           wantedNpc = Array.from(choices.values()).sort(function (a, b) {
@@ -1847,8 +1859,8 @@ const Town = {
       });
       // we have items to sell, might as well sell the dropable items as well
       if (sell.length) {
-        // should there be multiple attempts to interact with npc or if we fail should we move everything from the sell list to the drop list?
         let npc;
+        // should there be multiple attempts to interact with npc or if we fail should we move everything from the sell list to the drop list?
         for (let i = 0; i < 3 && !npc; i++) {
           npc = Town.initNPC("Shop", "clearInventory");
         }
@@ -1870,6 +1882,37 @@ const Town = {
               }
               sold && delay(250); // would a rand delay be better?
             });
+          // quick check before closing shopui
+          if (Town.choresActive && getUIFlag(sdk.uiflags.Shop) && npc && typeof npc === "object") {
+            let _needTpScrolls = me.checkScrolls(sdk.items.TomeofTownPortal) < 13;
+            let _needIdScrolls = Config.FieldID.Enabled && me.checkScrolls(sdk.items.TomeofIdentify) < 13;
+            if (_needTpScrolls && npc.getItem(sdk.items.ScrollofTownPortal)) {
+              console.info(null, "Buying some tp scrolls before we leave");
+              Town.fillTome(sdk.items.TomeofTownPortal);
+            }
+            if (_needIdScrolls && npc.getItem(sdk.items.ScrollofIdentify)) {
+              console.info(null, "Buying some id scrolls before we leave");
+              Town.fillTome(sdk.items.TomeofIdentify);
+            }
+            let _needPots = me.needPotions();
+            /** @param {ItemUnit} item */
+            let isPot = function (item) {
+              return [
+                sdk.items.type.HealingPotion,
+                sdk.items.type.ManaPotion,
+                sdk.items.type.RejuvPotion
+              ].includes(item.itemType);
+            };
+            if (_needPots && npc.getItems().some(isPot)) {
+              console.info(null, "Buying some pots before we leave");
+              Town.buyPotions();
+            }
+            let _needRepair = me.needRepair();
+            if (_needRepair && String.isEqual(Town.tasks.get(me.act).Repair, npc.name)) {
+              console.info(null, "Repairing before we leave");
+              Town.repair(true);
+            }
+          }
         }
         // now lets see if we need to drop anything, so lets exit the shop
         me.cancelUIFlags();
