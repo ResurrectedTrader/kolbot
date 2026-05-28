@@ -272,9 +272,11 @@ includeIfNotIncluded("core/Me.js");
       }
 
       if (getLocation() === sdk.game.locations.CharSelectConnecting) {
-        if (!Starter.LocationEvents.charSelectConnecting()) {
+        if (Starter.charSelectConnectingRetry > 3 || !Starter.LocationEvents.charSelectConnecting()) {
           D2Bot.printToConsole("Stuck at connecting screen");
           D2Bot.restart();
+        } else {
+          Starter.charSelectConnectingRetry++;
         }
       }
 
@@ -665,7 +667,8 @@ includeIfNotIncluded("core/Me.js");
     makeAccount: function (info) {
       me.blockMouse = true;
 
-      let openBnet = Profile().type === sdk.game.profiletype.OpenBattlenet;
+      const openBnet = Profile().type === sdk.game.profiletype.OpenBattlenet;
+      const delays = [100, 150, 200, 250, 300, 350, 400, 450, 500];
       
       // cycle until in empty char screen
       MainLoop:
@@ -719,6 +722,15 @@ includeIfNotIncluded("core/Me.js");
           }
 
           break;
+        case sdk.game.locations.CharSelectConnecting:
+          // if (Starter.charSelectConnectingRetry > 3 || !Starter.LocationEvents.charSelectConnecting()) {
+          //   D2Bot.printToConsole("Stuck at connecting screen");
+          //   D2Bot.restart();
+          // } else {
+          //   Starter.charSelectConnectingRetry++;
+          // }
+          // bugged but account was technically created, so just break to char select and let caller handle it
+          break MainLoop;
         case sdk.game.locations.LoginError:
           Controls.LoginErrorOk.click();
           
@@ -727,7 +739,7 @@ includeIfNotIncluded("core/Me.js");
           break;
         }
 
-        delay(100);
+        delay(delays.random());
       }
 
       me.blockMouse = false;
@@ -1070,6 +1082,7 @@ includeIfNotIncluded("core/Me.js");
     profileInfo: {},
     /** @type {number[]} */
     lastLocation: [],
+    charSelectConnectingRetry: 0,
 
     sayMsg: function (string) {
       if (!this.useChat) return;

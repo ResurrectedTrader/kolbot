@@ -289,22 +289,7 @@
     Config.OrgTorchHelper.GetFade = false; // Get fade by standing in a fire. You MUST have Last Wish, Treachery, or SpiritWard on your character being worn.
     
   // ##### AUTO-RUSH ##### //
-  // RUSHER USES FOLLOWER ENTRY SCRIPT
-  Scripts.Rusher = false; // Rush bot. For a list of commands, see Rusher.js
-    Config.Rusher.WaitPlayerCount = 0; // Wait until game has a certain number of players (0 - don't wait, 8 - wait for full game).
-    Config.Rusher.Cain = false; // Do cain quest.
-    Config.Rusher.Radament = false; // Do Radament quest.
-    Config.Rusher.LamEsen = false; // Do Lam Esen quest.
-    Config.Rusher.Izual = false; // Do Izual quest.
-    Config.Rusher.Shenk = false; // Do Shenk quest.
-    Config.Rusher.Anya = false; // Do Anya quest.
-    Config.Rusher.HellAncients = false; // Does Ancient's quest in hell (only if quester is level 60+)
-    Config.Rusher.GiveWps = false; // Give all Wps
-    Config.Rusher.LastRun = ""; // End rush after this run.
-  // RUSHEE USES LEADER ENTRY SCRIPT
-  Scripts.Rushee = false; // Automatic rushee, works with Rusher. Set Rusher's character name as Config.Leader
-    Config.Rushee.Quester = false; // Enter portals and get quest items.
-    Config.Rushee.Bumper = false; // Do Ancients and Baal. Minimum levels: 20 - norm, 40 - nightmare
+  // Setup now uses D2BotAutoRush.dbj, and config is in systems/autorush/RushConfig.js
   
   // ##### MANUAL RUSH ##### //
   Scripts.CrushTele = false; // classic rush teleporter. go to area of interest and press "-" numpad key

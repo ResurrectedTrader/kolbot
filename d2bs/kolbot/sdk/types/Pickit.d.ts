@@ -11,6 +11,7 @@ declare global {
       UTILITY: 6
   };
   namespace Pickit {
+    const enabled: boolean;
     const gidList: number[];
     let invoLocked: boolean;
     let beltSize: 1 | 2 | 3 | 4;

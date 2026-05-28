@@ -9,8 +9,8 @@
   const {
     AutoRush,
     RushModes,
-    RushConfig,
-  } = require("./RushConfig");
+  } = require("./RushConstants");
+  const { RushConfig } = require("./RushConfig");
   
   /**
    * @param {string} msg 
@@ -48,7 +48,7 @@
     return false;
   };
 
-  const bumperLvlReq = function () {
+  const getBumperLvlReq = function () {
     return [20, 40, 60][me.diff];
   };
   
@@ -58,8 +58,8 @@
    */
   const bumperCheck = function (nick) {
     return nick
-      ? Misc.findPlayer(nick).level >= bumperLvlReq()
-      : Misc.checkPartyLevel(bumperLvlReq());
+      ? Misc.findPlayer(nick).level >= getBumperLvlReq()
+      : Misc.checkPartyLevel(getBumperLvlReq());
   };
 
   /** @param {Act} act */
@@ -83,7 +83,7 @@
   };
 
   /** @param {string} [nick] */
-  const cain = function (nick) {
+  const cain = function cain (nick) {
     log("starting cain");
     Town.doChores();
     Pather.useWaypoint(sdk.areas.DarkWood, true) && Precast.doPrecast(true);
@@ -125,7 +125,7 @@
     while (getTickCount() - tick < Time.minutes(2)) {
       if (Pather.getPortal(sdk.areas.Tristram)) {
         let playersleftStony = Misc.poll(function () {
-          if (playerIn(me.area, nick)) {
+          if (playerIn(sdk.areas.RogueEncampment, nick)) {
             return true;
           }
           return false;
@@ -164,7 +164,7 @@
           if (playerIn(me.area, nick)) {
             return true;
           }
-          Pather.move(gibbet);
+          Pather.move(gibbet, { minDist: 8 });
           return false;
         }, AutoRush.playerWaitTimeout, 1000);
         
@@ -179,7 +179,7 @@
   };
 
   /** @param {string} [nick] */
-  const andariel = function (nick) {
+  const andariel = function andariel (nick) {
     log("starting andariel");
     Town.doChores();
     Pather.useWaypoint(sdk.areas.CatacombsLvl2, true) && Precast.doPrecast(true);
@@ -216,10 +216,10 @@
 
       Pather.usePortal(null, me.name);
       for (let i = 0; i < 3; i++) {
-        log("a2");
+        log("changeact 2");
         
         let playersMoved = Misc.poll(function () {
-          return !playersInAct(2);
+          return playersInAct(2);
         }, Time.seconds(30), Time.seconds(1));
 
         if (playersMoved) {
@@ -233,7 +233,7 @@
   };
 
   /** @param {string} [nick] */
-  const bloodraven = function (nick) {
+  const bloodraven = function bloodraven (nick) {
     log("starting bloodraven");
     Town.doChores();
     Pather.useWaypoint(sdk.areas.ColdPlains, true) && Precast.doPrecast(true);
@@ -274,7 +274,7 @@
   };
 
   /** @param {string} [nick] */
-  const smith = function (nick) {
+  const smith = function smith (nick) {
     log("starting smith");
     if (Misc.findPlayer(nick).level < 8) {
       log(nick + " you are not eligible for smith. You need to be at least level 8");
@@ -306,7 +306,7 @@
   };
   
   /** @param {string} [nick] */
-  const radament = function (nick) {
+  const radament = function radament (nick) {
     log("starting radament");
 
     /**
@@ -420,7 +420,7 @@
     return true;
   };
   /** @param {string} [nick] */
-  const cube = function (nick) {
+  const cube = function cube (nick) {
     if (me.normal) {
       log("starting cube");
       Pather.useWaypoint(sdk.areas.HallsoftheDeadLvl2, true);
@@ -453,7 +453,7 @@
     return true;
   };
   /** @param {string} [nick] */
-  const amulet = function (nick) {
+  const amulet = function amulet (nick) {
     const exits = [sdk.areas.ValleyofSnakes, sdk.areas.ClawViperTempleLvl1, sdk.areas.ClawViperTempleLvl2];
     log("starting amulet");
     Town.doChores();
@@ -487,7 +487,7 @@
     return true;
   };
   /** @param {string} [nick] */
-  const staff = function (nick) {
+  const staff = function staff (nick) {
     log("starting staff");
     Town.doChores();
     Pather.useWaypoint(sdk.areas.FarOasis, true) && Precast.doPrecast(true);
@@ -519,7 +519,7 @@
     return true;
   };
   /** @param {string} [nick] */
-  const summoner = function (nick) {
+  const summoner = function summoner (nick) {
     // right up 25449 5081 (25431, 5011)
     // left up 25081 5446 (25011, 5446)
     // right down 25830 5447 (25866, 5431)
@@ -601,7 +601,7 @@
     return true;
   };
   /** @param {string} [nick] */
-  const duriel = function (nick) {
+  const duriel = function duriel (nick) {
     log("starting duriel");
 
     if (me.inTown) {
@@ -667,15 +667,23 @@
     }
 
     Pather.useWaypoint(sdk.areas.PalaceCellarLvl1);
-    Pather.moveToExit([sdk.areas.HaremLvl2, sdk.areas.HaremLvl1], true);
+    if (!Pather.moveToExit([sdk.areas.HaremLvl2, sdk.areas.HaremLvl1], true)) {
+      // try again - rate but have seen it fail so safety check here
+      if (!Pather.moveToExit([sdk.areas.HaremLvl2, sdk.areas.HaremLvl1], true)) {
+        throw new Error("duriel failed to move to harem");
+      }
+    }
     Pather.moveTo(10022, 5047);
 
     if (AutoRush.rushMode !== RushModes.chanter) {
       for (let i = 0; i < 3; i++) {
+        if (!Pather.getPortal(sdk.areas.LutGholein, me.name)) {
+          Pather.makePortal();
+        }
         log("changeact 3");
         
         let playersMoved = Misc.poll(function () {
-          return !playersInAct(3);
+          return playersInAct(3);
         }, Time.seconds(30), Time.seconds(1));
 
         if (playersMoved) {
@@ -693,7 +701,7 @@
     return true;
   };
   /** @param {string} [nick] */
-  const gidbinn = function (nick) {
+  const gidbinn = function gidbinn (nick) {
     log("starting gidbinn");
 
     Town.doChores();
@@ -743,7 +751,7 @@
     return true;
   };
   /** @param {string} [nick] */
-  const lamesen = function (nick) {
+  const lamesen = function lamesen (nick) {
     log("starting lamesen");
 
     if (!Town.goToTown() || !Pather.useWaypoint(sdk.areas.KurastBazaar, true)) {
@@ -782,7 +790,7 @@
     return true;
   };
   /** @param {string} [nick] */
-  const brain = function (nick) {
+  const brain = function brain (nick) {
     const exits = [
       sdk.areas.FlayerDungeonLvl1,
       sdk.areas.FlayerDungeonLvl2,
@@ -820,7 +828,7 @@
     return true;
   };
   /** @param {string} [nick] */
-  const eye = function (nick) {
+  const eye = function eye (nick) {
     log("starting eye");
     Town.doChores();
     Pather.useWaypoint(sdk.areas.SpiderForest, true) && Precast.doPrecast(true);
@@ -853,7 +861,7 @@
     return true;
   };
   /** @param {string} [nick] */
-  const heart = function (nick) {
+  const heart = function heart (nick) {
     log("starting heart");
     Town.doChores();
     Pather.useWaypoint(sdk.areas.KurastBazaar, true) && Precast.doPrecast(true);
@@ -887,7 +895,7 @@
   };
   // re-write to prevent fail to complete quest due to killing council from to far away
   /** @param {string} [nick] */
-  const travincal = function (nick) {
+  const travincal = function travincal (nick) {
     log("starting travincal");
     Town.doChores();
     Pather.useWaypoint(sdk.areas.Travincal, true) && Precast.doPrecast(true);
@@ -931,7 +939,7 @@
     return true;
   };
   /** @param {string} [nick] */
-  const mephisto = function (nick) {
+  const mephisto = function mephisto (nick) {
     log("starting mephisto");
 
     Town.doChores();
@@ -982,10 +990,10 @@
     if (AutoRush.rushMode !== RushModes.chanter) {
       // allow 3 attempts
       for (let i = 0; i < 3; i++) {
-        log("a4");
+        log("changeact 4");
         
         let playersMoved = Misc.poll(function () {
-          return !playersInAct(4);
+          return playersInAct(4);
         }, Time.seconds(30), Time.seconds(1));
 
         if (playersMoved) {
@@ -1000,7 +1008,7 @@
     return true;
   };
   /** @param {string} [nick] */
-  const izual = function (nick) {
+  const izual = function izual (nick) {
     log("starting izual");
 
     /**
@@ -1086,7 +1094,7 @@
     return true;
   };
   /** @param {string} [nick] */
-  const diablo = function (nick) {
+  const diablo = function diablo (nick) {
     log("starting diablo");
 
     function inviteIn () {
@@ -1135,10 +1143,10 @@
     if (me.expansion && AutoRush.rushMode !== RushModes.chanter) {
       // allow 3 attempts
       for (let i = 0; i < 3; i++) {
-        log("a5");
+        log("changeact 5");
         
         let playersMoved = Misc.poll(function () {
-          return !playersInAct(5);
+          return playersInAct(5);
         }, Time.seconds(30), Time.seconds(1));
 
         if (playersMoved) {
@@ -1153,7 +1161,7 @@
     return true;
   };
   /** @param {string} [nick] */
-  const shenk = function (nick) {
+  const shenk = function shenk (nick) {
     log("starting shenk");
 
     Pather.useWaypoint(sdk.areas.FrigidHighlands, true) && Precast.doPrecast(false);
@@ -1185,7 +1193,7 @@
     return true;
   };
   /** @param {string} [nick] */
-  const anya = function (nick) {
+  const anya = function anya (nick) {
     !me.inTown && Town.goToTown();
 
     log("starting anya");
@@ -1248,7 +1256,7 @@
     return true;
   };
   /** @param {string} [nick] */
-  const ancients = function (nick) {
+  const ancients = function ancients (nick) {
     if (AutoRush.rushMode !== RushModes.chanter) {
       if (!RushConfig[me.profile].config.Ancients[sdk.difficulty.nameOf(me.diff)]) {
         if (!RushConfig[me.profile].config.Wps) {
@@ -1262,7 +1270,7 @@
 
     if (!bumperCheck(nick)) {
       if (AutoRush.rushMode === RushModes.chanter) {
-        log(nick + " you are not eligible for ancients. You need to be at least level " + bumperLvlReq());
+        log(nick + " you are not eligible for ancients. You need to be at least level " + getBumperLvlReq());
         
         return false;
       }
@@ -1314,7 +1322,7 @@
     return true;
   };
   /** @param {string} [nick] */
-  const baal = function (nick) {
+  const baal = function baal (nick) {
     if (me.hell && AutoRush.rushMode !== RushModes.chanter) {
       if (!RushConfig[me.profile].config.Wps) {
         log("Baal not done in Hell ~Hell rush complete~");
@@ -1338,7 +1346,7 @@
     }
 
     if (AutoRush.rushMode === RushModes.chanter && !bumperCheck(nick)) {
-      log(nick + " you are not eligible for baal. You need to be at least level " + bumperLvlReq());
+      log(nick + " you are not eligible for baal. You need to be at least level " + getBumperLvlReq());
         
       return false;
     }
@@ -1413,6 +1421,7 @@
     playerIn: playerIn,
     playersInAct: playersInAct,
     bumperCheck: bumperCheck,
+    getBumperLvlReq: getBumperLvlReq,
     andariel: andariel,
     bloodraven: bloodraven,
     smith: smith,

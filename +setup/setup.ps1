@@ -116,6 +116,7 @@ Copy-IfNotExists "$SETUP_DIR\mulelogger\LoggerConfig.js" "$SYSTEMS_DIR\mulelogge
 Copy-IfNotExists "$SETUP_DIR\pubjoin\PubJoinConfig.js" "$SYSTEMS_DIR\pubjoin\PubJoinConfig.js" "PubJoinConfig.js to pubjoin directory"
 Copy-IfNotExists "$SETUP_DIR\torch\FarmerConfig.js" "$SYSTEMS_DIR\torch\FarmerConfig.js" "FarmerConfig.js to torch directory"
 Copy-IfNotExists "$SETUP_DIR\charrefresher\RefresherConfig.js" "$SYSTEMS_DIR\charrefresher\RefresherConfig.js" "RefresherConfig.js to charrefresher directory"
+Copy-IfNotExists "$SETUP_DIR\autorush\RushConfig.js" "$SYSTEMS_DIR\autorush\RushConfig.js" "RushConfig.js to autorush directory"
 Write-Host "System configuration files processed successfully!"
 Write-Host ""
 

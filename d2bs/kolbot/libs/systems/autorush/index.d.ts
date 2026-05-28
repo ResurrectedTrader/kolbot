@@ -7,8 +7,8 @@ declare global {
     chanter = 4,
     manual = 5,
   }
-  type DefaultConfig = {
-    type: RushModes;
+  type RusheeConfig = {
+    type: RushModes.bumper | RushModes.quester | RushModes.follower;
     startProfiles: string[];
     leader: string;
     create: {
@@ -20,6 +20,15 @@ declare global {
        */
       charInfo: string;
     };
+    config: {
+      /** Rusher in game character name */
+      Leader: string;
+    };
+  };
+  type RusherConfig = {
+    type: RushModes.rusher | RushModes.manual;
+    /** How long to wait for a player to leave/enter an area before ending quest script with failed */
+    playerWaitTimeout: number;
     config: {
       WaitPlayerCount: number;
       Cain: boolean;
@@ -36,7 +45,9 @@ declare global {
       Wps: boolean;
       LastRun: string;
     };
+    startProfiles: string[];
   };
+  type DefaultConfig = RusheeConfig | RusherConfig;
   type RushConfig = {
     [key: string]: DefaultConfig;
   };

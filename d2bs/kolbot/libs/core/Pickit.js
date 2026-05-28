@@ -9,6 +9,7 @@
  * @namespace Pickit
  */
 const Pickit = {
+  enabled: true,
   gidList: new Set(),
   invoLocked: true,
   beltSize: 1,
@@ -614,7 +615,7 @@ const Pickit = {
    * @returns {boolean} If we picked items
    */
   pickItems: function (range = Config.PickRange) {
-    if (me.dead) return false;
+    if (me.dead || !Pickit.enabled) return false;
     
     let needMule = false;
     const canUseMule = AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("muleInfo");
@@ -780,14 +781,14 @@ const Pickit = {
    * @param {number} retry 
    */
   fastPick: function (retry = 3) {
-    let item;
+    if (me.dead || !Pickit.enabled) return false;
     const _removeList = [];
     const itemList = [];
     const range = Config.FastPickRange || Config.PickRange;
 
     for (let gid of this.gidList) {
       _removeList.push(gid);
-      item = Game.getItem(-1, -1, gid);
+      let item = Game.getItem(-1, -1, gid);
       if (item
         && item.onGroundOrDropping
         && (
@@ -812,7 +813,7 @@ const Pickit = {
       itemList.sort(this.sortFastPickItems);
       let check = itemList.shift();
       // we were passed the copied unit, lets find the real thing
-      item = Game.getItem(check.classid, -1, check.gid);
+      let item = Game.getItem(check.classid, -1, check.gid);
 
       // Check if the item unit is still valid
       if (item && item.x !== undefined) {

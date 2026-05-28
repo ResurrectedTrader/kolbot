@@ -265,7 +265,7 @@ const Pather = {
     Pather.initialized = true;
   },
 
-  init: function () {
+  init: function (force) {
     if (!this.initialized) {
       addEventListener("scriptmsg", Pather.cacheListener);
       me.classic && (Pather.nonTownWpAreas = this.nonTownWpAreas.filter((wp) => wp < sdk.areas.Harrogath));
@@ -273,7 +273,7 @@ const Pather = {
       scriptBroadcast("get-cached-waypoints");
       delay(500);
       
-      if (!Config.WaypointMenu && !Pather.initialized) {
+      if ((!Config.WaypointMenu && !Pather.initialized) || force) {
         !getWaypoint(1) && this.getWP(me.area);
         me.cancelUIFlags();
         Pather.initialized = true;

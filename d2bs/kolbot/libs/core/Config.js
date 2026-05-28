@@ -93,6 +93,12 @@ let Config = {
       }
     }
 
+    if (getScript("D2BotAutoRush.dbj")) {
+      const { RushConfig } = require("../systems/autorush/RushConfig");
+      const { rushConfigInit } = require("../systems/autorush/RushConstants");
+      rushConfigInit(RushConfig[me.profile]);
+    }
+
     // Always set the orginal say function
     global._say = global.say;
     if (Config.Silence && !Config.LocalChat.Enabled) {

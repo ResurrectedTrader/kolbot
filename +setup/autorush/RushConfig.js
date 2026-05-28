@@ -121,26 +121,12 @@
    * @type {Object.<string, DefaultConfig}>}
    */
   const RushConfig = {
-    "liberaloutrun": {
-      type: RushModes.rusher,
-      leader: "quester",
-      config: {
-        Wps: true,
-        LastRun: "andariel",
-      }
-    },
-    "quester": {
+    "quester-profile": {
       type: RushModes.quester,
-      startProfiles: ["liberaloutrun"],
-      create: {
-        account: "bgrushtesb",
-        password: "pass",
-        charInfo: "scl-sorc",
-      },
       config: {
-        Leader: "liberaloutrun",
-      }
-    },
+        Leader: "my-rusher-char",
+      },
+    }
   };
 
   module.exports = {

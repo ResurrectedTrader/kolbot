@@ -1,3 +1,4 @@
+/// <reference path="../systems/autorush/index.d.ts" />
 /**
 *  @filename    Rusher.js
 *  @author      kolton, theBGuy
@@ -14,245 +15,272 @@
 *
 */
 
-function Rusher () {
-  load("threads/rushthread.js");
-  delay(500);
+const Rusher = new Runnable(
+  function Rusher () {
+    load("threads/rushthread.js");
+    delay(500);
 
-  let i, command, master, commandSplit0;
-  let commands = [];
-  let sequence = [
-    "cain", "andariel", "radament", "cube", "amulet", "staff", "summoner", "duriel", "lamesen",
-    "travincal", "mephisto", "izual", "diablo", "shenk", "anya", "ancients", "baal", "givewps"
-  ];
-  const RushThread = {
-    /** @type {Script} */
-    _thread: null,
-    path: "threads/rushthread.js",
+    const {
+      RushConfig,
+    } = require("../systems/autorush/RushConfig");
+    const { RushModes, AutoRush } = require("../systems/autorush/RushConstants");
+    
+    const commands = [];
+    /** @type {RusherConfig} */
+    const rushProfile = RushConfig[me.profile];
+    
+    let master = "";
+    let done = false;
+    let gotQInfo = false;
 
-    get: function () {
-      if (!this._thread) {
-        this._thread = getScript(this.path);
-      }
-      return this._thread;
-    },
-    /** @param {String} msg */
-    send: function (msg) {
-      // sign the msg so we can ignore other threads' messages
-      this.get().send("rush-" + msg);
-    },
-    pause: function () {
-      say("Pausing");
-      console.log("Pausing rush thread");
-      this.get().pause();
-    },
-    resume: function () {
-      say("Resuming");
-      console.log("Resuming rush thread");
-      this.get().resume();
-    },
-    start: function () {
-      load(this.path);
-      delay(500);
-      
-      while (!this.get()) {
-        delay(500);
-      }
-    },
-    stop: function () {
-      this.get().stop();
-    },
-    reload: function () {
-      this.stop();
+    const RushThread = {
+      /** @type {Script} */
+      _thread: null,
+      path: "threads/rushthread.js",
 
-      while (this.get().running) {
-        delay(3);
-      }
-      this._thread = null;
-      this.start();
-    },
-  };
-
-  const getPartyAct = function () {
-    let party = getParty();
-    let minArea = 999;
-
-    do {
-      if (party.name !== me.name) {
-        while (!party.area) {
-          me.overhead("Waiting for party area info");
-          delay(500);
+      get thread() {
+        if (!this._thread) {
+          this._thread = getScript(this.path);
         }
-
-        if (party.area < minArea) {
-          minArea = party.area;
+        return this._thread;
+      },
+      /** @param {String} msg */
+      send: function (msg) {
+        // sign the msg so we can ignore other threads' messages
+        this.thread.send("rush-" + msg);
+      },
+      /**
+      * @param {string} action
+      * @param {object} blob
+      */
+      sendBlob: function (action, blob) {
+        // sign the msg so we can ignore other threads' messages
+        this.thread.send({ type: "rush", action: action, data: blob });
+      },
+      pause: function () {
+        say("Pausing");
+        console.log("Pausing rush thread");
+        this.thread.pause();
+      },
+      resume: function () {
+        say("Resuming");
+        console.log("Resuming rush thread");
+        this.thread.resume();
+      },
+      start: function () {
+        load(this.path);
+        nativeDelay(500);
+        
+        while (!this.thread) {
+          nativeDelay(500);
         }
-      }
-    } while (party.getNext());
+      },
+      stop: function () {
+        this.thread.stop();
+      },
+      reload: function () {
+        this.stop();
 
-    return sdk.areas.actOf(minArea);
-  };
+        while (this.thread.running) {
+          nativeDelay(50);
+        }
+        this._thread = null;
+        this.start();
+      },
+    };
 
-  const chatEvent = function (nick, msg) {
-    if (nick !== me.name) {
+    const getPartyAct = function () {
+      let party = getParty();
+      let minArea = 999;
+
+      do {
+        if (party.name !== me.name) {
+          Misc.poll(function () {
+            me.overhead("Waiting for party area info from " + party.name);
+            return party.area;
+          }, Time.seconds(5), 500);
+
+          if (party.area < minArea) {
+            minArea = party.area;
+          }
+        }
+      } while (party.getNext());
+
+      return sdk.areas.actOf(minArea);
+    };
+
+    /**
+     * @param {string} nick 
+     * @param {string} msg 
+     */
+    const chatEvent = function (nick, msg) {
+      if (!nick || !msg) return;
+      if (nick === me.name) return;
       if (typeof msg !== "string") return;
-      switch (msg) {
-      case "master":
-        if (!master) {
-          say(nick + " is my master.");
-
-          master = nick;
-        } else {
-          say("I already have a master.");
+      if (msg === "who is rusher") {
+        say("i am rusher");
+        return;
+      }
+      try {
+        if (msg.includes("qinfo")) {
+          if ((!!master && nick === master) || !master) {
+            RushThread.sendBlob("highestquest", {
+              highestquest: msg.split("qinfo ")[1],
+              quester: nick,
+            });
+            console.log("Received quest info from master");
+            gotQInfo = true;
+          }
+          return;
         }
+        if (msg.includes("wpinfo")) {
+          if ((!!master && nick === master) || !master) {
+            /** @type {string[]} */
+            let wps = JSON.parse(msg.split("wpinfo ")[1]);
+            RushThread.sendBlob("wps", {
+              wps: wps.map(wp => parseInt(wp, 10)),
+            });
+            console.log("Received wp info from master");
+          }
+          return;
+        }
+        switch (msg) {
+        case "master":
+          if (master) {
+            if (master !== nick) {
+              throw new Error("I already have a master.");
+            }
+          } else {
+            say(nick + " is my master.");
 
-        break;
-      case "release":
-        if (nick === master) {
+            master = nick;
+          }
+
+          break;
+        case "release":
+          if (nick !== master) {
+            throw new Error("I'm only accepting commands from my master.");
+          }
           say("I have no master now.");
-
           master = false;
-        } else {
-          say("I'm only accepting commands from my master.");
-        }
 
-        break;
-      case "quit":
-        if (nick === master) {
+          break;
+        case "quit":
+          if (nick !== master) {
+            throw new Error("I'm only accepting commands from my master.");
+          }
+          done = true;
           say("bye ~");
           scriptBroadcast("quit");
-        } else {
-          say("I'm only accepting commands from my master.");
-        }
 
-        break;
-      default:
-        if (msg && msg.match(/^do \w|^clear \d|^pause$|^resume$/gi)) {
-          if (nick === master) {
+          break;
+        default:
+          if (msg && msg.match(/^do \w|^clear \d|^pause$|^resume$/gi)) {
+            if (nick !== master) {
+              throw new Error("I'm only accepting commands from my master.");
+            }
             commands.push(msg);
-          } else {
-            say("I'm only accepting commands from my master.");
           }
-        } else if (msg && msg.includes("highestquest")) {
-          if (!!master && nick === master || !master) {
-            command = msg;
-          } else {
-            say("I'm only accepting commands from my master.");
-          }
-        }
 
+          break;
+        }
+      } catch (e) {
+        say("Error: " + e.message);
+      }
+    };
+
+    addEventListener("chatmsg", chatEvent);
+
+    const playerWaitTimeout = getTickCount() + Time.minutes(2);
+    const { WaitPlayerCount } = rushProfile.config;
+    
+    while (Misc.getPartyCount() < Math.min(8, WaitPlayerCount)) {
+      if (getTickCount() > playerWaitTimeout) {
+        say("Player wait timed out. Expected: " + WaitPlayerCount + ", Found: " + Misc.getPartyCount());
         break;
       }
-    }
-  };
-
-  addEventListener("chatmsg", chatEvent);
-
-  while (Misc.getPartyCount() < Math.min(8, Config.Rusher.WaitPlayerCount)) {
-    me.overhead("Waiting for players to join");
-    delay(500);
-  }
-
-  // Skip to a higher act if all party members are there
-  switch (getPartyAct()) {
-  case 2:
-    say("Party is in act 2, starting from act 2");
-    RushThread.send("skiptoact 2");
-
-    break;
-  case 3:
-    say("Party is in act 3, starting from act 3");
-    RushThread.send("skiptoact 3");
-
-    break;
-  case 4:
-    say("Party is in act 4, starting from act 4");
-    RushThread.send("skiptoact 4");
-
-    break;
-  case 5:
-    say("Party is in act 5, starting from act 5");
-    RushThread.send("skiptoact 5");
-
-    break;
-  }
-
-  // get info from master
-  let tick = getTickCount();
-  let askAgain = 1;
-  say("questinfo");
-  while (!command) {
-    // wait up to 3 minutes
-    if (getTickCount() - tick > Time.minutes(3)) {
-      break;
+      me.overhead("Waiting " + Math.round((playerWaitTimeout - getTickCount()) / 1000) + "s for players to join");
+      delay(500);
     }
 
-    if (getTickCount() - tick > Time.minutes(askAgain)) {
+    // Skip to a higher act if all party members are there
+    let partyAct = getPartyAct();
+    if (partyAct > 1) {
+      say("Party is in act " + partyAct + ", skipping to act " + partyAct);
+      RushThread.send("skiptoact " + partyAct);
+    }
+
+    if (rushProfile.type === RushModes.rusher) {
+      // get quest info from master
+      let tick = getTickCount();
+      let askAgain = 1;
       say("questinfo");
-      askAgain++;
+      
+      while (!gotQInfo) {
+        // wait up to 3 minutes
+        if (getTickCount() - tick > Time.minutes(3)) {
+          break;
+        }
+
+        if (getTickCount() - tick > Time.minutes(askAgain)) {
+          say("questinfo");
+          askAgain++;
+        }
+      }
     }
-  }
+    
+    delay(200);
+    RushThread.send("go");
 
-  if (command) {
-    commandSplit0 = command.split(" ")[1];
-    if (!!commandSplit0 && sequence.some(el => el.toLowerCase() === commandSplit0)) {
-      RushThread.send(command.toLowerCase());
-    }
-  }
+    while (!done) {
+      if (commands.length > 0) {
+        let command = commands.shift();
 
-  delay(200);
-  RushThread.send("go");
+        switch (command) {
+        case "pause":
+          RushThread.pause();
 
-  while (true) {
-    if (commands.length > 0) {
-      command = commands.shift();
+          break;
+        case "resume":
+          RushThread.resume();
 
-      switch (command) {
-      case "pause":
-        RushThread.pause();
+          break;
+        default:
+          if (typeof command === "string") {
+            let commandSplit0 = command.split(" ")[0];
 
-        break;
-      case "resume":
-        RushThread.resume();
+            if (commandSplit0 === undefined) {
+              break;
+            }
 
-        break;
-      default:
-        if (typeof command === "string") {
-          commandSplit0 = command.split(" ")[0];
-
-          if (commandSplit0 === undefined) {
-            break;
-          }
-
-          if (commandSplit0.toLowerCase() === "do") {
-            for (i = 0; i < sequence.length; i += 1) {
-              if (command.split(" ")[1] && sequence[i].match(command.split(" ")[1], "gi")) {
-                RushThread.reload();
-                RushThread.send(command.split(" ")[1]);
-
+            if (commandSplit0.toLowerCase() === "do") {
+              let script = (command.split(" ")[1] || "").toLowerCase();
+              if (!script || !AutoRush.sequences.some(el => el.match(script, "gi"))) {
+                say("Invalid sequence");
                 break;
               }
-            }
-
-            i === sequence.length && say("Invalid sequence");
-          } else if (commandSplit0.toLowerCase() === "clear") {
-            if (!isNaN(parseInt(command.split(" ")[1], 10))
-              && parseInt(command.split(" ")[1], 10) > 0
-              && parseInt(command.split(" ")[1], 10) <= 132) {
+              RushThread.reload();
+              RushThread.send(script);
+            } else if (commandSplit0.toLowerCase() === "clear") {
+              let area = command.split(" ")[1];
+              if (!area) break;
+              let areaId = parseInt(area, 10);
+              if (isNaN(areaId) || areaId < sdk.areas.RogueEncampment || areaId > sdk.areas.WorldstoneChamber) {
+                say("Invalid area");
+                break;
+              }
               RushThread.reload();
               RushThread.send(command);
-            } else {
-              say("Invalid area");
             }
           }
-        }
 
-        break;
+          break;
+        }
       }
+
+      delay(100);
     }
 
-    delay(100);
+    return true;
   }
-
-  // eslint-disable-next-line no-unreachable
-  return true;
-}
+);
