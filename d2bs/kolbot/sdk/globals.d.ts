@@ -27,6 +27,11 @@ declare global {
   type KolbotScript = import("./types/kolbot-scripts").KolbotScript;
   type EventsInstance = InstanceType<typeof import("libs/modules/Events")>;
 
+  /**
+   * @description A string that can be used in NTIP lists, which supports some additional syntax for item properties.
+   */
+  type NipString = string;
+
   interface Error {
     fileName: string;
     lineNumber: number;
