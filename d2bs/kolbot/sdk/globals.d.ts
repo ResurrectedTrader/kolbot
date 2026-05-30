@@ -475,6 +475,7 @@ declare global {
     readonly isBoss: boolean;
     readonly isGhost: boolean;
     readonly isDoll: boolean;
+    readonly isSoul: boolean;
     readonly isMonsterObject: boolean;
     readonly isMonsterEgg: boolean;
     readonly isMonsterNest: boolean;

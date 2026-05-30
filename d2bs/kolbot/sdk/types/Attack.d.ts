@@ -13,7 +13,7 @@ declare global {
   namespace Attack {
     const infinity: boolean;
     const auradin: boolean;
-    const monsterObjects: number[];
+    const monsterObjects: Set<number>;
     const Result: AttackResult;
     const _killed: Set<number>;
     function haveKilled(id: number | string): boolean;
@@ -84,14 +84,14 @@ declare global {
     function deploy(unit: Monster, distance: any, spread: any, range: any, ...args: any[]): boolean;
     function getMonsterCount(x: any, y: any, range: any, list: any): number;
     function buildGrid(
-      xmin: any,
-      xmax: any,
-      ymin: any,
-      ymax: any,
-      spread: any,
+      xmin: number,
+      xmax: number,
+      ymin: number,
+      ymax: number,
+      spread: number,
     ): {
-      x: any;
-      y: any;
+      x: number;
+      y: number;
       coll: number;
     }[];
     function skipCheck(unit: Monster): boolean;

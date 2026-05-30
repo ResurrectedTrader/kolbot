@@ -130,6 +130,19 @@ Object.defineProperties(Unit.prototype, {
       ].includes(this.classid);
     },
   },
+  isSoul: {
+    get: function () {
+      return [
+        sdk.monsters.BurningSoul1,
+        sdk.monsters.BurningSoul2,
+        sdk.monsters.SoulKiller1,
+        sdk.monsters.SoulKiller2,
+        sdk.monsters.SoulKiller3,
+        sdk.monsters.SoulKiller4,
+        sdk.monsters.SoulKiller5,
+      ].includes(this.classid);
+    },
+  },
   isMonsterObject: {
     get: function () {
       return [

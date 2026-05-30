@@ -10,7 +10,7 @@
 const Attack = {
   infinity: false,
   auradin: false,
-  monsterObjects: [
+  monsterObjects: new Set([
     sdk.monsters.Turret1, sdk.monsters.Turret2,
     sdk.monsters.Turret3, sdk.monsters.MummyGenerator,
     sdk.monsters.GargoyleTrap, sdk.monsters.LightningSpire,
@@ -21,7 +21,7 @@ const Attack = {
     sdk.monsters.CatapultW, sdk.monsters.BarricadeTower,
     sdk.monsters.PrisonDoor, sdk.monsters.DiablosBoneCage,
     sdk.monsters.DiablosBoneCage2, sdk.monsters.Hut,
-  ],
+  ]),
   Result: {
     FAILED: 0,
     SUCCESS: 1,
@@ -1769,7 +1769,7 @@ const Attack = {
     }
 
     let result;
-    let mObject = Attack.monsterObjects.includes(unitid);
+    let mObject = Attack.monsterObjects.has(unitid);
     let nonFloorAreas = [
       sdk.areas.ArcaneSanctuary, sdk.areas.RiverofFlame, sdk.areas.ChaosSanctuary,
       sdk.areas.Abaddon, sdk.areas.PitofAcheron, sdk.areas.InfernalPit
