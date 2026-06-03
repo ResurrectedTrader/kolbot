@@ -303,6 +303,9 @@
     skillMap.set(sdk.skills.Teleport, {
       hand: sdk.skills.hand.Right,
       range: 40,
+      condition: function () {
+        return !Config.NoTele;
+      }
     });
     skillMap.set(sdk.skills.GlacialSpike, {
       hand: sdk.skills.hand.Left,

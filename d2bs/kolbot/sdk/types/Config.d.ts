@@ -146,6 +146,12 @@ declare global {
     ImmunityException: DamageType[];
     ScanShrines: number[];
     AutoShriner: boolean;
+    UseWells: {
+      HpPercent: number,
+      MpPercent: number,
+      StaminaPercent: number,
+      StatusEffects: boolean,
+    };
     Debug: boolean;
     AutoMule: {
       Trigger: (number | string | ((item: ItemUnit) => boolean))[];
