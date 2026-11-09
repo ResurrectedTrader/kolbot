@@ -3,7 +3,7 @@
     /** @type {Array<runeword>} runewords - Array of runeword objects. */
     const runewords = [];
     const ladder = me.ladder > 0;
-    const RUNES_COUNT = 169;
+    const RUNES_COUNT = 200;
 
     const validRunes = Object.values(sdk.items.runes).filter(v => !isNaN(v));
     const validInsertable = (id) => {
